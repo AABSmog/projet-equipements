@@ -11,6 +11,8 @@ class SignalementController {
     static namespace = "app"
     static defaultAction = "list"
 
+    def validationMessagesService
+
     def list() {
         def user = session.user
         [signalementList: Signalement.findAllByPersonnel(user, [sort: "dateCreated", order: "desc"])]
@@ -41,6 +43,11 @@ class SignalementController {
             redirect(uri: "/app/equipement/list")
             return
         }
+        if (!params.description?.trim()) {
+            flash.error = "La description est obligatoire."
+            render(view: "create", model: [equipement: equipement])
+            return
+        }
         def typeSignalement
         if (params.type) {
             try {
@@ -61,7 +68,7 @@ class SignalementController {
             flash.success = "Signalement enregistre"
             redirect(controller: "equipement", action: "show", id: equipement.id, namespace: "app")
         } else {
-            flash.error = "Erreur lors de l'envoi du signalement"
+            flash.error = validationMessagesService.message(signalement) ?: "Erreur lors de l'envoi du signalement"
             render(view: "create", model: [equipement: equipement])
         }
     }

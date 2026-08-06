@@ -3,6 +3,7 @@ package proj.equipment
 class LoginController {
 
     def authService
+    def validationMessagesService
 
     def index() {
         if (session.user) {
@@ -45,7 +46,7 @@ class LoginController {
                 session.user = personnel
                 redirect(uri: "/app")
             } else {
-                flash.error = "Erreur lors de la creation du compte"
+                flash.error = validationMessagesService.message(personnel) ?: "Erreur lors de la creation du compte"
                 render(view: "/register/index", model: [personnel: personnel])
             }
         }

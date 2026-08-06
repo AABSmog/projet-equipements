@@ -9,7 +9,7 @@ class Equipement {
     static belongsTo = [type: TypeEquipement]
 
     static constraints = {
-        numeroSerie blank: false, unique: true
+        numeroSerie nullable: true, blank: false, unique: true
         description blank: false, maxSize: 500
     }
 

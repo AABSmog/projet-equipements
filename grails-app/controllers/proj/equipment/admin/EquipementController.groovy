@@ -12,6 +12,8 @@ class EquipementController {
 
     static namespace = "admin"
 
+    def validationMessagesService
+
     def index() {
         redirect(action: "list")
     }
@@ -41,6 +43,7 @@ class EquipementController {
 
     def save() {
         def typeId = params['type.id']
+        TypeEquipement typeCree = null
         if (typeId == 'autre') {
             def nom = params.nouveauType?.trim()
             if (!nom) {
@@ -52,13 +55,13 @@ class EquipementController {
             if (typeExist) {
                 typeId = typeExist.id.toString()
             } else {
-                def nouveauType = new TypeEquipement(nom: nom)
-                if (!nouveauType.save(flush: true)) {
+                typeCree = new TypeEquipement(nom: nom)
+                if (!typeCree.save(flush: true)) {
                     flash.error = "Erreur lors de la creation du type"
                     redirect(action: "create")
                     return
                 }
-                typeId = nouveauType.id.toString()
+                typeId = typeCree.id.toString()
             }
         }
         if (!typeId) {
@@ -72,7 +75,10 @@ class EquipementController {
             flash.success = "Equipement cree"
             redirect(action: "list")
         } else {
-            flash.error = "Erreur lors de la creation"
+            if (typeCree) {
+                typeCree.delete(flush: true)
+            }
+            flash.error = validationMessagesService.message(equipement) ?: "Erreur lors de la creation"
             render(view: "create", model: [equipement: equipement, typeEquipementList: TypeEquipement.list(sort: "nom")])
         }
     }
@@ -95,6 +101,7 @@ class EquipementController {
             return
         }
         def typeId = params['type.id']
+        TypeEquipement typeCree = null
         if (typeId == 'autre') {
             def nom = params.nouveauType?.trim()
             if (!nom) {
@@ -106,13 +113,13 @@ class EquipementController {
             if (typeExist) {
                 typeId = typeExist.id.toString()
             } else {
-                def nouveauType = new TypeEquipement(nom: nom)
-                if (!nouveauType.save(flush: true)) {
+                typeCree = new TypeEquipement(nom: nom)
+                if (!typeCree.save(flush: true)) {
                     flash.error = "Erreur lors de la creation du type"
                     redirect(action: "edit", id: equipement.id)
                     return
                 }
-                typeId = nouveauType.id.toString()
+                typeId = typeCree.id.toString()
             }
         }
         if (!typeId) {
@@ -126,7 +133,10 @@ class EquipementController {
             flash.success = "Equipement mis a jour"
             redirect(action: "list")
         } else {
-            flash.error = "Erreur lors de la mise a jour"
+            if (typeCree) {
+                typeCree.delete(flush: true)
+            }
+            flash.error = validationMessagesService.message(equipement) ?: "Erreur lors de la mise a jour"
             render(view: "edit", model: [equipement: equipement, typeEquipementList: TypeEquipement.list(sort: "nom")])
         }
     }

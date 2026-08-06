@@ -9,6 +9,8 @@ class PersonnelController {
 
     static namespace = "admin"
 
+    def validationMessagesService
+
     def list() {
         def q = params.q
         def results = q ? Personnel.createCriteria().list {
@@ -31,7 +33,7 @@ class PersonnelController {
             flash.success = "Personnel cree"
             redirect(action: "list")
         } else {
-            flash.error = "Erreur lors de la creation"
+            flash.error = validationMessagesService.message(personnel) ?: "Erreur lors de la creation"
             render(view: "create", model: [personnel: personnel])
         }
     }
@@ -64,7 +66,7 @@ class PersonnelController {
             flash.success = "Personnel mis a jour"
             redirect(action: "list")
         } else {
-            flash.error = "Erreur lors de la mise a jour"
+            flash.error = validationMessagesService.message(personnel) ?: "Erreur lors de la mise a jour"
             render(view: "edit", model: [personnel: personnel])
         }
     }
