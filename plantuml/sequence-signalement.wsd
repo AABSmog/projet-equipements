@@ -1,0 +1,49 @@
+@startuml
+actor Utilisateur as user
+participant "SignalementController\n(app)" as Ctrl
+participant "Equipement" as Eqp
+participant "Affectation" as Aff
+participant "Signalement" as Sig
+database DB
+
+user -> Ctrl: GET /app/signalement/create?id=X
+activate Ctrl
+Ctrl -> Eqp: Equipement.get(id)
+alt equipement null
+  Ctrl --> user: flash.error + redirect /app/equipement/list
+  deactivate Ctrl
+  return
+end
+Ctrl -> Aff: findByEquipementAndPersonnelAndDateRetourIsNull\n(equipement, session.user)
+alt affectation non trouvee
+  Ctrl --> user: flash.error "Pas affecte"
+  deactivate Ctrl
+  return
+end
+Ctrl --> user: formulaire signalement
+deactivate Ctrl
+
+user -> Ctrl: POST /app/signalement/save\n(equipementId, type, description)
+activate Ctrl
+Ctrl -> Eqp: Equipement.get(equipementId)
+Ctrl -> Aff: verifie affectation
+alt pas affecte
+  Ctrl --> user: redirect /app/equipement/list
+  deactivate Ctrl
+  return
+end
+Ctrl -> Ctrl: TypeSignalement.valueOf(params.type)
+alt type invalide
+  Ctrl --> user: flash.error + render create
+  deactivate Ctrl
+  return
+end
+Ctrl -> Sig: new Signalement(equipement, personnel, type, description)
+Sig -> DB: save(flush:true)
+alt ok
+  Ctrl --> user: flash.success + redirect show equipement
+else erreur
+  Ctrl --> user: flash.error + render create
+end
+deactivate Ctrl
+@enduml

@@ -1,0 +1,76 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+enum EtatEquipement {
+  DISPONIBLE
+  AFFECTE
+  EN_PANNE
+  REPARE
+  HORS_SERVICE
+}
+
+enum TypeSignalement {
+  PANNE
+  MAINTENANCE
+  AUTRE
+}
+
+enum RolePersonnel {
+  ADMIN
+  USER
+}
+
+class TypeEquipement {
+  + String nom
+}
+
+class Equipement {
+  + String numeroSerie
+  + String description
+  + EtatEquipement etat
+  + beforeInsert() : genere SN-UUID
+}
+
+class Affectation {
+  + Date dateAffectation
+  + Date dateRetour
+  + String raisonRetour
+  + String infoEquipement
+}
+
+class Signalement {
+  + Date dateCreated
+  + Equipement equipement
+  + Personnel personnel
+  + TypeSignalement type
+  + String description
+  + String infoEquipement
+}
+
+class Personnel {
+  + String nom
+  + String prenom
+  + String email
+  + String motDePasse
+  + RolePersonnel role
+  + beforeInsert() : hash BCrypt
+  + beforeUpdate() : hash si modifie
+}
+
+TypeEquipement "1" --> "*" Equipement : contient
+Equipement "0..1" --> Affectation : affecte
+Personnel "1" --> "*" Affectation : recoit
+Personnel "1" --> "*" Signalement : signale
+Equipement "0..1" --> Signalement : concerne
+
+note right of Equipement
+  SN auto-genere en beforeInsert
+  format: SN-XXXXXXXX
+end note
+
+note right of Personnel
+  Mot de passe hashe avec BCrypt
+  automatiquement en beforeInsert/beforeUpdate
+end note
+
+@enduml

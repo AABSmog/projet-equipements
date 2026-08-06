@@ -1,0 +1,33 @@
+@startuml
+actor Admin
+participant "EquipementController" as Ctrl
+participant "TypeEquipement" as Type
+participant "Equipement" as Eqp
+database DB
+
+Admin -> Ctrl: POST /admin/equipement/save
+activate Ctrl
+
+alt type.id == "autre"
+  Ctrl -> Ctrl: verifie nouveauType non vide
+  Ctrl -> Type: findByNomIlike(nom)
+  alt type existant
+    Ctrl -> Ctrl: reutilise type existant
+  else nouveau type
+    Ctrl -> DB: new TypeEquipement(nom).save()
+    DB --> Ctrl: type cree
+  end
+end
+
+Ctrl -> Eqp: new Equipement(params)
+activate Eqp
+Eqp -> Eqp: beforeInsert()
+Eqp -> Eqp: genere numeroSerie (UUID)
+Eqp -> DB: save()
+DB --> Eqp: equipement persiste
+deactivate Eqp
+
+DB --> Ctrl: ok
+Ctrl --> Admin: redirect /admin/equipement/list
+deactivate Ctrl
+@enduml

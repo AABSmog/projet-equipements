@@ -1,0 +1,50 @@
+@startuml
+start
+:Admin cree equipement;
+if (Type existe ?) then (oui)
+  :Selectionne type existant;
+else (non)
+  :Choisit "Autre...";
+  :Saisit nouveau type;
+  :TypeEquipement cree automatiquement;
+endif
+:Equipement cree (etat=DISPONIBLE);
+:SN-UUID genere;
+partition Affectation {
+  :Admin affecte a un personnel;
+  :Etat passe a AFFECTE;
+  if (Retour ?) then (oui)
+    :Admin enregistre le retour;
+    :Saisit raison (optionnel);
+    :Etat repasse a DISPONIBLE;
+  else (non)
+    :Toujours affecte;
+  endif
+}
+partition Signalement {
+  :Employe signale un probleme;
+  if (Equipement concerne ?) then (oui)
+    :Lien direct;
+  else (supprime)
+    :infoEquipement conserve le nom/SN;
+  endif
+}
+if (Declassement ?) then (oui)
+  :Admin declasser l'equipement;
+  if (Equipement affecte ?) then (oui)
+    :Affectation clôturee (dateRetour + infoEquipement);
+  else (non)
+    :Pas d'affectation active;
+  endif
+  :Etat passe a HORS_SERVICE;
+  note right: reste dans le systeme,\nn'est plus affectable
+else (non)
+  partition Suppression {
+    :Admin supprime equipement;
+    :Affectations liees nullifiees + infoEquipement;
+    :Signalements lies nullifies + infoEquipement;
+    :Equipement supprime;
+  }
+endif
+stop
+@enduml

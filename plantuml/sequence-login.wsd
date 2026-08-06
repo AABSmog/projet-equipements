@@ -1,0 +1,37 @@
+@startuml
+actor User
+participant "LoginController" as Login
+participant "AuthService" as Auth
+participant "Personnel" as UserDB
+database DB
+
+User -> Login: POST /login/attempt\n(email, password)
+activate Login
+
+Login -> Auth: authenticate(email, password)
+activate Auth
+Auth -> UserDB: findByEmail(email)
+UserDB --> Auth: user (ou null)
+alt user trouve
+  Auth -> Auth: BCrypt.checkpw(password, hash)
+  alt mot de passe correct
+    Auth --> Login: user
+    Login -> Login: session.user = user
+    Login -> Login: redirectBasedOnRole()
+    alt role = ADMIN
+      Login --> User: redirect /admin
+    else role = USER
+      Login --> User: redirect /app
+    end
+  else mot de passe incorrect
+    Auth --> Login: null
+    Login --> User: flash.error + render login
+  end
+else user introuvable
+  Auth --> Login: null
+  Login --> User: flash.error + render login
+end
+
+deactivate Login
+deactivate Auth
+@enduml

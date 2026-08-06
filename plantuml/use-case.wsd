@@ -1,0 +1,39 @@
+@startuml
+left to right direction
+
+actor Admin as admin
+actor Utilisateur as user
+
+rectangle "Gestion des equipements" {
+  usecase "S'authentifier" as UC1
+  usecase "Gerer les equipements" as UC2
+  usecase "Creer equipement\n(avec nouveau type)" as UC3
+  usecase "Modifier equipement" as UC4
+  usecase "Declasser equipement\n(HORS_SERVICE)" as UC5
+  usecase "Supprimer equipement\n(historise les refs)" as UC12
+  usecase "Affecter equipement" as UC6
+  usecase "Desaffecter (retour admin)" as UC7
+  usecase "Gerer le personnel" as UC8
+  usecase "Signaler un probleme" as UC9
+  usecase "Consulter mes equipements" as UC10
+  usecase "Retourner mon equipement" as UC13
+  usecase "Rechercher" as UC11
+}
+
+admin --> UC1
+admin --> UC2
+admin --> UC3
+admin --> UC4
+admin --> UC5
+admin --> UC12
+admin --> UC6
+admin --> UC7
+admin --> UC8
+admin --> UC11
+user --> UC1
+user --> UC9
+user --> UC10
+user --> UC13
+
+UC3 .> (Creer type equipement) : <<extend>>
+@enduml

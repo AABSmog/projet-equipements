@@ -1,0 +1,50 @@
+@startuml
+actor Admin
+participant "AffectationController" as Ctrl
+participant "Equipement" as Eqp
+participant "Personnel" as P
+participant "Affectation" as Aff
+database DB
+
+== Affectation ==
+Admin -> Ctrl: POST /admin/affectation/affecter\n(equipementId, personnelId)
+activate Ctrl
+
+Ctrl -> Eqp: Equipement.get(equipementId)
+Ctrl -> P: Personnel.get(personnelId)
+
+alt equipement && personnel && etat == DISPONIBLE
+  Ctrl -> DB: withTransaction {
+  Ctrl -> Aff: new Affectation(equipement, personnel, date=new Date())
+  Aff -> DB: save(flush:true)
+  Ctrl -> Eqp: equipement.etat = AFFECTE
+  Eqp -> DB: save(flush:true)
+  DB --> Ctrl: ok
+  Ctrl --> Admin: flash.success "Equipement affecte"
+else condition non remplie
+  Ctrl --> Admin: flash.error "Impossible d'affecter"
+end
+
+Ctrl --> Admin: redirect /admin/affectation/list
+deactivate Ctrl
+
+== Retour ==
+Admin -> Ctrl: POST /admin/affectation/retour\n?id=X&raisonRetour=...
+activate Ctrl
+
+Ctrl -> Aff: Affectation.get(id)
+alt affectation trouvee
+  Ctrl -> DB: withTransaction {
+  Ctrl -> Aff: dateRetour = new Date()
+  Ctrl -> Aff: raisonRetour = params.raisonRetour
+  Aff -> DB: save(flush:true)
+  alt equipement non null
+    Ctrl -> Eqp: equipement.etat = DISPONIBLE
+    Eqp -> DB: save(flush:true)
+  end
+  DB --> Ctrl: ok
+  Ctrl --> Admin: flash.success "Retour enregistre"
+end
+Ctrl --> Admin: redirect /admin/affectation/list
+deactivate Ctrl
+@enduml

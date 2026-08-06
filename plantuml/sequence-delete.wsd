@@ -1,0 +1,39 @@
+@startuml
+actor Admin
+participant "EquipementController" as Ctrl
+participant "Equipement" as Eqp
+participant "Affectation" as Aff
+participant "Signalement" as Sig
+database DB
+
+Admin -> Ctrl: POST /admin/equipement/delete/X
+activate Ctrl
+
+Ctrl -> Eqp: Equipement.get(id)
+alt equipement trouve
+  Ctrl -> Ctrl: info = "${type?.nom} - ${numeroSerie} (supprime)"
+  Ctrl -> DB: Affectation.findAllByEquipement(equipement)
+  DB --> Ctrl: liste affectations
+  loop chaque affectation
+    Ctrl -> Aff: dateRetour = new Date() (si null)
+    Ctrl -> Aff: infoEquipement = info
+    Ctrl -> Aff: equipement = null
+    Aff -> DB: save()
+  end
+  Ctrl -> DB: Signalement.findAllByEquipement(equipement)
+  DB --> Ctrl: liste signalements
+  loop chaque signalement
+    Ctrl -> Sig: infoEquipement = info
+    Ctrl -> Sig: equipement = null
+    Sig -> DB: save()
+  end
+  Ctrl -> Eqp: delete(flush:true)
+  DB --> Ctrl: ok
+  Ctrl --> Admin: flash.success "Equipement supprime"
+else equipement null
+  Ctrl --> Admin: rien
+end
+
+Ctrl --> Admin: redirect /admin/equipement/list
+deactivate Ctrl
+@enduml

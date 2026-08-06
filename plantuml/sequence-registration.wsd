@@ -1,0 +1,35 @@
+@startuml
+actor Visiteur as user
+participant "LoginController" as Login
+participant "Personnel" as P
+database DB
+
+user -> Login: GET /register
+activate Login
+Login --> user: formulaire inscription\n(nom, prenom, email, motDePasse)
+deactivate Login
+
+user -> Login: POST /register/save\n(nom, prenom, email, motDePasse)
+activate Login
+
+Login -> P: new Personnel(nom, prenom, email, motDePasse, role=USER)
+activate P
+
+P -> P: beforeInsert()
+P -> P: BCrypt.hashpw(motDePasse)
+P -> DB: save(flush:true)
+
+alt creation reussie
+  DB --> P: ok
+  P --> Login: personnel
+  Login -> Login: session.user = personnel
+  Login --> user: flash.success + redirect /app
+else erreur validation
+  DB --> P: echec
+  P --> Login: null
+  Login --> user: flash.error + render register
+end
+
+deactivate Login
+deactivate P
+@enduml
