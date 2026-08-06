@@ -82,12 +82,14 @@ Légende : OK = conforme / KO = anomalie.
 
 28 scénarios exécutés — **26 OK** / **2 KO** (S7, S8).
 
-| # | Anomalie | Scénario | Gravité |
-|---|----------|----------|---------|
-| A1 | Création d'équipement impossible via l'UI : `numeroSerie` non fourni par le formulaire, validation « cannot be null » avant `beforeInsert` → l'auto-génération du SN ne fonctionne jamais | S7 | **MAJEURE** |
-| A2 | Type créé « orphelin » quand la création d'équipement échoue après un « Autre... » (le type reste en base sans équipement) | S8 | **MAJEURE** |
-| A3 | Message d'erreur technique en anglais exposé à l'utilisateur (« Property [email] ... must be unique », « cannot be null », « must be unique ») | S6, S11, S12 | Mineure |
-| A4 | Message générique « Erreur lors de l'envoi du signalement » sans indiquer la cause (description obligatoire) | S23 | Mineure |
+| # | Anomalie | Scénario | Gravité | Issue |
+|---|----------|----------|---------|-------|
+| A1 | Création d'équipement impossible via l'UI : `numeroSerie` non fourni par le formulaire, validation « cannot be null » avant `beforeInsert` → l'auto-génération du SN ne fonctionne jamais | S7 | **MAJEURE** | [#1](https://github.com/AABSmog/projet-equipements/issues/1) |
+| A2 | Type créé « orphelin » quand la création d'équipement échoue après un « Autre... » (le type reste en base sans équipement) | S8 | **MAJEURE** | [#2](https://github.com/AABSmog/projet-equipements/issues/2) |
+| A3 | Message d'erreur technique en anglais exposé à l'utilisateur (« Property [email] ... must be unique », « cannot be null », « must be unique ») | S6, S11, S12 | Mineure | [#3](https://github.com/AABSmog/projet-equipements/issues/3) |
+| A4 | Message générique « Erreur lors de l'envoi du signalement » sans indiquer la cause (description obligatoire) | S23 | Mineure | [#4](https://github.com/AABSmog/projet-equipements/issues/4) |
+
+> Convention : chaque cahier de recette est versionné (`recette-vN.md`). Les cahiers successifs sont enregistrés dans ce dossier à chaque campagne de test. Chaque anomalie est tracée dans une issue GitHub.
 
 ## Données de test créées pendant la recette (base dev)
 
