@@ -11,7 +11,14 @@ class Affectation {
     static belongsTo = [personnel: Personnel]
 
     static constraints = {
-        dateRetour nullable: true
+        personnel nullable: false
+        dateAffectation nullable: false
+        dateRetour nullable: true, validator: { val, obj ->
+            if (val && obj.dateAffectation && val.before(obj.dateAffectation)) {
+                return 'affectation.dateRetour.anterieur'
+            }
+            return true
+        }
         raisonRetour nullable: true
         equipement nullable: true
         infoEquipement nullable: true

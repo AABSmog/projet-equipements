@@ -12,6 +12,8 @@ class Signalement {
 
     static constraints = {
         description blank: false, maxSize: 1000
+        type nullable: false
+        personnel nullable: false
         equipement nullable: true
         infoEquipement nullable: true
     }

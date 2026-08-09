@@ -28,6 +28,7 @@ class AffectationController {
         def equipement = Equipement.get(params.equipementId)
         def personnel = Personnel.get(params.personnelId)
         if (equipement && personnel && equipement.etat == EtatEquipement.DISPONIBLE) {
+            def ok = false
             Affectation.withTransaction { status ->
                 def affectation = new Affectation(
                     equipement: equipement,
@@ -36,9 +37,17 @@ class AffectationController {
                 )
                 affectation.save(flush: true)
                 equipement.etat = EtatEquipement.AFFECTE
-                equipement.save(flush: true)
+                if (affectation.hasErrors() || !equipement.save(flush: true)) {
+                    status.setRollbackOnly()
+                } else {
+                    ok = true
+                }
             }
-            flash.success = "Equipement affecte a ${personnel.prenom} ${personnel.nom}"
+            if (ok) {
+                flash.success = "Equipement affecte a ${personnel.prenom} ${personnel.nom}"
+            } else {
+                flash.error = "Impossible d'affecter cet equipement"
+            }
         } else {
             flash.error = "Impossible d'affecter cet equipement"
         }

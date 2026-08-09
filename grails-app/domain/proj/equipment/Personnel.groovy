@@ -16,10 +16,10 @@ class Personnel {
     RolePersonnel role = RolePersonnel.USER
 
     static constraints = {
-        email blank: false, unique: true, email: true
-        nom blank: false
-        prenom blank: false
-        motDePasse blank: false
+        email blank: false, unique: true, email: true, maxSize: 254
+        nom blank: false, maxSize: 100
+        prenom blank: false, maxSize: 100
+        motDePasse blank: false, minSize: 6, maxSize: 72
     }
 
     String toString() { "$prenom $nom ($email)" }

@@ -2,6 +2,8 @@ package proj.equipment.admin
 
 import proj.equipment.Personnel
 import proj.equipment.RolePersonnel
+import proj.equipment.Affectation
+import proj.equipment.Signalement
 import grails.gorm.transactions.Transactional
 
 @Transactional
@@ -74,6 +76,18 @@ class PersonnelController {
     def delete() {
         def personnel = Personnel.get(params.id)
         if (personnel) {
+            if (personnel.id == session.user?.id) {
+                flash.error = "Impossible de supprimer votre propre compte"
+                redirect(action: "list")
+                return
+            }
+            def nbAffectations = Affectation.countByPersonnel(personnel)
+            def nbSignalements = Signalement.countByPersonnel(personnel)
+            if (nbAffectations > 0 || nbSignalements > 0) {
+                flash.error = "Suppression impossible : historique d'affectations ou de signalements existant"
+                redirect(action: "list")
+                return
+            }
             personnel.delete(flush: true)
             flash.success = "Personnel supprime"
         }
