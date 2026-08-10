@@ -13,7 +13,7 @@ buildscript {
     }
 }
 
-version = "0.1"
+version = "2.0.0"
 group = "proj.equipment"
 
 apply plugin:"eclipse"

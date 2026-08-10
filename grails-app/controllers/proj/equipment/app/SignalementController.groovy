@@ -12,10 +12,18 @@ class SignalementController {
     static defaultAction = "list"
 
     def validationMessagesService
+    def auditService
 
     def list() {
         def user = session.user
-        [signalementList: Signalement.findAllByPersonnel(user, [sort: "dateCreated", order: "desc"])]
+        int max = Math.min((params.max as Integer) ?: 10, 100)
+        int offset = Math.max(((params.offset as Integer) ?: 0).toInteger(), 0)
+        def results = Signalement.createCriteria().list(max: max, offset: offset) {
+            eq("personnel", user)
+            fetchMode('equipement', org.hibernate.FetchMode.JOIN)
+            order("dateCreated", "desc")
+        }
+        [signalementList: results, total: results.totalCount, max: max, offset: offset]
     }
 
     def create() {
@@ -65,6 +73,7 @@ class SignalementController {
             description: params.description
         )
         if (signalement.save(flush: true)) {
+            auditService.log(session.user, "SIGNALEMENT", "Equipement", equipement?.id, params.description)
             flash.success = "Signalement enregistre"
             redirect(controller: "equipement", action: "show", id: equipement.id, namespace: "app")
         } else {

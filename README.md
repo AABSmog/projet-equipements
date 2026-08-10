@@ -13,6 +13,7 @@ Développée avec **Grails 7**, **Groovy**, **Spring Boot 3** et **PostgreSQL**.
 - [Versions](#versions)
 - [Prérequis](#prérequis)
 - [Démarrage rapide (15 minutes)](#démarrage-rapide-15-minutes)
+- [Déploiement Docker (v2)](#déploiement-docker-v2)
 - [Comptes de démonstration](#comptes-de-démonstration)
 - [Diagramme des classes de domaine](#diagramme-des-classes-de-domaine)
 - [Règles métier](#règles-métier)
@@ -31,13 +32,23 @@ Développée avec **Grails 7**, **Groovy**, **Spring Boot 3** et **PostgreSQL**.
   problème, restituer un équipement.
 - **Inscription publique** pour les utilisateurs (l'admin crée les comptes
   administrateurs).
-- **Sécurité** : contrôle d'accès par rôle, mots de passe hachés (BCrypt),
-  validation renforcée des saisies.
+- **Sécurité (v2)** : contrôle d'accès par rôle, mots de passe hachés (BCrypt),
+  politique de mot de passe (8 caractères min, majuscule, minuscule, chiffre),
+  protection **CSRF** (jeton par session), limitation du **brute force**
+  (5 essais / 15 min, verrouillage 5 min, quota d'inscriptions), en-têtes HTTP
+  sécurisés (CSP, X-Frame-Options, nosniff...), cookie de session `HttpOnly` +
+  `SameSite=Lax`.
+- **Piste d'audit (v2)** : chaque action sensible (connexion, création,
+  modification, suppression, attribution, retour, signalement...) est tracée
+  dans `AuditLog` et consultable sur `/admin/audit`.
+- **Pagination (v2)** : toutes les listes sont paginées (avec filtres
+  conservés) pour rester fluides sur de grands volumes.
 
 ## Versions
 
 | Composant | Version |
 |-----------|---------|
+| Application | 2.0.0 (profil `prod` pour déploiement) |
 | Grails | 7.2.1 (wrapper fourni, pas d'installation globale requise) |
 | Groovy | 4.0.32 |
 | Spring Boot | 3.5.16 |
@@ -83,8 +94,16 @@ variables d'environnement (aucun secret n'est commité).
 | `EQUIPMENTS_DB_URL` | URL JDBC de la base | `jdbc:postgresql://localhost:5432/Equipments` |
 | `EQUIPMENTS_DB_USER` | Utilisateur PostgreSQL | `postgres` |
 | `EQUIPMENTS_DB_PASSWORD` | **Mot de passe PostgreSQL (obligatoire)** | — |
-| `DEMO_ADMIN_PASSWORD` | Mot de passe des comptes admin de démo | `admin123` |
-| `DEMO_USER_PASSWORD` | Mot de passe des comptes user de démo | `pass123` |
+| `EQUIPMENTS_DB_POOL_MAX` | Taille max. du pool Hikari | `10` |
+| `EQUIPMENTS_DB_POOL_MIN` | Pool minimal (idle) Hikari | `2` |
+| `PORT` | Port HTTP du serveur embarqué | `18080` |
+| `DEMO_ADMIN_PASSWORD` | Mot de passe des comptes admin de démo | `Admin123` |
+| `DEMO_USER_PASSWORD` | Mot de passe des comptes user de démo | `User1234` |
+
+Paramètres de sécurité (surchargeables, voir `application.yml`) :
+`EQUIPMENTS_LOGIN_MAX_ATTEMPTS` (5), `EQUIPMENTS_LOGIN_WINDOW_SECONDS`
+(900), `EQUIPMENTS_LOGIN_LOCK_DURATION` (300),
+`EQUIPMENTS_REGISTER_MAX_PER_WINDOW` (3).
 
 Exemples (adaptez le mot de passe PostgreSQL à votre installation) :
 
@@ -115,8 +134,9 @@ export EQUIPMENTS_DB_PASSWORD=votre_mot_de_passe
 
 </details>
 
-> Les valeurs par défaut `admin123` / `pass123` ne s'appliquent qu'au jeu de
-> données de démonstration, en environnement de développement uniquement.
+> Les valeurs par défaut `Admin123` / `User1234` ne s'appliquent qu'au jeu de
+> données de démonstration, en environnement de développement uniquement. Une
+> base existante conserve les mots de passe de ses comptes (hashs BCrypt inchangés).
 
 ### 4. Lancer l'application
 
@@ -139,12 +159,44 @@ démonstration (voir [plus bas](#jeu-de-données-de-démonstration)).
 grailsw.bat war
 ```
 
+Produit `build/libs/Proj-Equipment-2.0.0.war` (WAR exécutable Spring Boot,
+profil `prod`).
+
+## Déploiement Docker (v2)
+
+Un `Dockerfile` multi-étapes et un `docker-compose.yml` sont fournis pour lancer
+PostgreSQL 17 + l'application en quelques commandes.
+
+Prérequis : Docker avec Compose v2.
+
+```bash
+# 1. construire et démarrer (schéma créé au premier boot, dbCreate: update)
+EQUIPMENTS_DB_PASSWORD='mot_de_passe_secret' docker compose up -d --build
+
+# 2. suivre les logs de l'application
+docker compose logs -f app
+
+# 3. vérifier la santé (healthcheck)
+curl http://localhost:8080/actuator/health
+```
+
+L'application écoute sur `localhost:8080` (port surchargeable :
+`PORT=9090 docker compose up -d`). Les données PostgreSQL et les logs sont
+persistés dans des volumes nommés (`equipments-data`, `equipments-logs`). En
+profil `prod` : cookie de session `secure`, `dbCreate: update`, journalisation
+fichier + console, actuator restreint à `health`/`info`.
+
+> Conseils production : gérer le schéma avec Flyway/Liquibase puis passer
+> `dbCreate: validate` (voir `grails-app/conf/application-prod.yml`) ; mettre
+> l'application derrière un reverse-proxy HTTPS (le HSTS est activé dès que la
+> requête arrive en HTTPS).
+
 ## Comptes de démonstration
 
 | Rôle | Email | Mot de passe |
 |------|-------|--------------|
-| Administrateur | `mamadou.diop@example.com` | `admin123` |
-| Utilisateur | `aissatou.diallo@example.com` | `pass123` |
+| Administrateur | `mamadou.diop@example.com` | `Admin123` |
+| Utilisateur | `aissatou.diallo@example.com` | `User1234` |
 
 > Identifiants de démonstration uniquement, surchargeables via les variables
 > `DEMO_ADMIN_PASSWORD` / `DEMO_USER_PASSWORD`.
@@ -246,7 +298,8 @@ plantuml plantuml/class-diagram.wsd
 
 **Personnel**
 
-- Le mot de passe est obligatoire (6 caractères minimum) et haché en BCrypt
+- Le mot de passe est obligatoire (8 caractères minimum, avec au moins une
+  minuscule, une majuscule et un chiffre) et haché en BCrypt
   (`beforeInsert` / `beforeUpdate`).
 - L'email est obligatoire, unique et valide.
 - Un personnel ayant un historique (affectations ou signalements) ne peut pas
@@ -282,33 +335,37 @@ Les mots de passe proviennent de la configuration (`demo.adminPassword` /
 ## Tests
 
 La suite Spock couvre les contraintes de domaine, le service d'attribution
-(`AffectationService`) et un parcours complet d'intégration.
+(`AffectationService`), la sécurité (`LoginAttemptService`, `AuditService`) et
+un parcours complet d'intégration.
 
 ```bash
 # Tous les tests (unitaires + intégration)
-grailsw.bat test-app
+# Les tests d'intégration utilisent la base configurée via EQUIPMENTS_DB_*.
+EQUIPMENTS_DB_PASSWORD='votre_mot_de_passe' grailsw.bat test-app
 
 # Uniquement les tests unitaires
 grailsw.bat test
 ```
 
-Résultat attendu : **35 tests, 0 échec**.
+Résultat attendu : **45 tests, 0 échec** (43 unitaires + 2 d'intégration).
 
 ## Structure du projet
 
 ```
 Proj-Equipment/
 ├── grails-app/
-│   ├── conf/          # application.yml (base, démo)
-│   ├── controllers/   # AdminController, app/*, admin/*
-│   ├── domain/        # Equipement, Personnel, Affectation, Signalement, TypeEquipement, enums
+│   ├── conf/          # application.yml (base, démo, sécurité), application-prod.yml, logback-spring.xml
+│   ├── controllers/   # AdminController, app/*, admin/*, interceptors (CSRF, en-têtes)
+│   ├── domain/        # Equipement, Personnel, Affectation, Signalement, TypeEquipement, AuditLog, enums
 │   ├── init/          # BootStrap (jeu de données de démo)
-│   ├── services/      # AffectationService, ValidationMessagesService
-│   └── views/         # GSP (layouts admin/app, écrans)
+│   ├── services/      # AffectationService, ValidationMessagesService, LoginAttemptService, AuditService
+│   └── views/         # GSP (layouts, écrans, shared/_pagination, admin/audit)
 ├── plantuml/          # Diagrammes (classes, séquences, use case)
 ├── src/test/          # Tests Spock unitaires
 ├── src/integration-test/ # Tests Spock d'intégration
 ├── cahiers-de-recette/   # Procès-verbaux de recette (v1, suivi des anomalies)
+├── Dockerfile         # Build multi-étapes (image de production)
+├── docker-compose.yml # PostgreSQL 17 + application
 └── build.gradle
 ```
 

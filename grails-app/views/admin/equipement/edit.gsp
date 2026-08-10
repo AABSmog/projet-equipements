@@ -13,6 +13,7 @@
             </div>
         </g:hasErrors>
             <form action="/admin/equipement/update" method="post">
+            <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
             <input type="hidden" name="id" value="${equipement.id}"/>
             <div class="mb-4">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Type</label>

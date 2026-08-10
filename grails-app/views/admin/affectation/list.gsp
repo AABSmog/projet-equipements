@@ -18,6 +18,7 @@
     <div class="bg-white border border-gray-200 px-3 py-2 mb-6">
         <h2 class="text-xs font-semibold text-gray-700 mb-2">Nouvelle affectation</h2>
         <form action="/admin/affectation/affecter" method="post" class="flex gap-2 items-end">
+            <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
             <div class="flex-1">
                 <label class="block text-xs text-gray-500 mb-0.5">Equipement</label>
                 <div>
@@ -126,6 +127,7 @@
                         <td class="px-4 py-3">
                             <g:if test="${!a.dateRetour}">
                                 <form action="/admin/affectation/retour/${a.id}" method="post" class="flex gap-2 items-center" onsubmit="return confirm('Enregistrer le retour ?')">
+                                    <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
                                     <input type="text" name="raisonRetour" placeholder="Raison du retour" required class="px-2 py-1 border border-gray-300 text-xs w-32 rounded-none focus:outline-none focus:border-gray-600"/>
                                     <button type="submit" class="px-3 py-1 text-xs bg-green-600 text-white font-semibold hover:bg-green-700 rounded-none">Retour</button>
                                 </form>
@@ -139,5 +141,6 @@
             </tbody>
         </table>
     </div>
+    <g:render template="/shared/pagination" model="[total: total, max: max, offset: offset]"/>
 </body>
 </html>

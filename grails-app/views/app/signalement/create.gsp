@@ -13,6 +13,7 @@
         </div>
         <div class="bg-white border border-gray-200 p-6">
             <form action="/app/signalement/save" method="post">
+                <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
                 <input type="hidden" name="equipementId" value="${equipement.id}"/>
                 <div class="mb-4">
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Type de probleme</label>

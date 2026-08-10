@@ -38,7 +38,10 @@
                         <td class="px-4 py-3"><span class="text-xs font-semibold px-2 py-1 ${p.role == proj.equipment.RolePersonnel.ADMIN ? 'bg-maroon text-white' : 'bg-gray-200 text-gray-700'}">${p.role?.label}</span></td>
                         <td class="px-4 py-3">
                             <a href="/admin/personnel/edit/${p.id}" class="text-gray-600 hover:text-gray-900 mr-3">Modifier</a>
-                            <a href="/admin/personnel/delete/${p.id}" class="text-red-600 hover:text-red-800" onclick="return confirm('Supprimer ?')">Supprimer</a>
+                            <form action="/admin/personnel/delete/${p.id}" method="post" class="inline">
+                                <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
+                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm bg-transparent border-0 p-0 cursor-pointer" onclick="return confirm('Supprimer ce personnel ?')">Supprimer</button>
+                            </form>
                         </td>
                     </tr>
                 </g:each>
@@ -48,5 +51,6 @@
             </tbody>
         </table>
     </div>
+    <g:render template="/shared/pagination" model="[total: total, max: max, offset: offset]"/>
 </body>
 </html>

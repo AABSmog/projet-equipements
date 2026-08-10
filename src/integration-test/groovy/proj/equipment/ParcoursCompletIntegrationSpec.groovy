@@ -15,11 +15,11 @@ class ParcoursCompletIntegrationSpec extends Specification {
         def type = new TypeEquipement(nom: "Imprimante Integ").save(flush: true, failOnError: true)
         def admin = new Personnel(
             nom: "Admin", prenom: "Mamadou", email: "admin.integ@example.com",
-            motDePasse: "admin123", role: RolePersonnel.ADMIN
+            motDePasse: "Admin123", role: RolePersonnel.ADMIN
         ).save(flush: true, failOnError: true)
         def employe = new Personnel(
             nom: "Employe", prenom: "Aissatou", email: "employe.integ@example.com",
-            motDePasse: "pass123"
+            motDePasse: "User1234"
         ).save(flush: true, failOnError: true)
         def equipement = new Equipement(type: type, description: "Imprimante laser").save(flush: true, failOnError: true)
 
@@ -36,7 +36,7 @@ class ParcoursCompletIntegrationSpec extends Specification {
 
         when: "une seconde attribution de l equipement est tentee"
         def autre = new Personnel(
-            nom: "Autre", prenom: "Pers", email: "autre.integ@example.com", motDePasse: "pass123"
+            nom: "Autre", prenom: "Pers", email: "autre.integ@example.com", motDePasse: "User1234"
         ).save(flush: true, failOnError: true)
         def doubleAttribution = affectationService.attribuer(equipement, autre, admin)
 
@@ -86,10 +86,10 @@ class ParcoursCompletIntegrationSpec extends Specification {
         def type = new TypeEquipement(nom: "Projecteur Integ").save(flush: true, failOnError: true)
         def admin = new Personnel(
             nom: "Admin", prenom: "Chef", email: "admin.hist@example.com",
-            motDePasse: "admin123", role: RolePersonnel.ADMIN
+            motDePasse: "Admin123", role: RolePersonnel.ADMIN
         ).save(flush: true, failOnError: true)
         def employe = new Personnel(
-            nom: "Employe", prenom: "User", email: "employe.hist@example.com", motDePasse: "pass123"
+            nom: "Employe", prenom: "User", email: "employe.hist@example.com", motDePasse: "User1234"
         ).save(flush: true, failOnError: true)
         def equipement = new Equipement(type: type, description: "Video projecteur").save(flush: true, failOnError: true)
 

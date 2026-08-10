@@ -38,7 +38,8 @@ class ValidationMessagesService {
                 return null
             case 'motDePasse':
                 if (c.contains('blank') || c.contains('null')) return 'Le mot de passe est obligatoire.'
-                if (c.contains('minsize')) return 'Le mot de passe doit contenir au moins 6 caracteres.'
+                if (c.contains('force')) return 'Le mot de passe doit contenir 8 caracteres minimum, avec au moins une minuscule, une majuscule et un chiffre.'
+                if (c.contains('minsize')) return 'Le mot de passe doit contenir au moins 8 caracteres.'
                 if (c.contains('maxsize')) return 'Le mot de passe est trop long (72 caracteres max).'
                 return null
             case 'etat':

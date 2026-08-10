@@ -33,6 +33,7 @@
                                 <a href="/app/equipement/show/${a.equipement.id}" class="text-blue-600 hover:text-blue-800 text-sm font-semibold">Voir</a>
                                 <a href="/app/signalement/create/${a.equipement.id}" class="ml-3 text-red-600 hover:text-red-800 text-sm font-semibold">Signaler</a>
                                 <form action="/app/equipement/retour/${a.equipement.id}" method="post" class="inline ml-3" onsubmit="return confirm('Retourner cet equipement ?')">
+                                    <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
                                     <input type="hidden" name="raisonRetour" value="Retourne par l'employe"/>
                                     <button type="submit" class="text-green-600 hover:text-green-800 text-sm font-semibold bg-transparent border-0 p-0 cursor-pointer">Retourner</button>
                                 </form>
@@ -46,5 +47,6 @@
             </tbody>
         </table>
     </div>
+    <g:render template="/shared/pagination" model="[total: total, max: max, offset: offset]"/>
 </body>
 </html>

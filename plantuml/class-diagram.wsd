@@ -59,12 +59,22 @@ class Personnel {
   + beforeUpdate() : hash si modifie
 }
 
+class AuditLog {
+  + Date dateCreation
+  + String utilisateur
+  + String action
+  + String cible
+  + Long cibleId
+  + String details
+}
+
 TypeEquipement "1" --> "*" Equipement : contient
 Equipement "0..1" --> Affectation : affecte
 Personnel "1" --> "*" Affectation : recoit
 Personnel "0..1" --> "*" Affectation : attribue
 Personnel "1" --> "*" Signalement : signale
 Equipement "0..1" --> Signalement : concerne
+Personnel "1" --> "*" AuditLog : trace
 
 note right of Equipement
   SN auto-genere en beforeInsert

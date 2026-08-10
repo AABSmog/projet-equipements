@@ -35,8 +35,9 @@
                 <g:if test="${!typeEquipementList}">
                     <tr><td colspan="2" class="px-4 py-8 text-center text-gray-400">Aucun type</td></tr>
                 </g:if>
-                </tbody>
+</tbody>
         </table>
     </div>
+    <g:render template="/shared/pagination" model="[total: total, max: max, offset: offset]"/>
 </body>
 </html>

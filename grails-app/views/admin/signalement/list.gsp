@@ -37,7 +37,10 @@
                         <td class="px-4 py-3 text-gray-600 max-w-xs truncate">${s.description?.encodeAsHTML()}</td>
                         <td class="px-4 py-3 text-gray-500"><g:formatDate format="dd/MM/yyyy" date="${s.dateCreated}" /></td>
                         <td class="px-4 py-3">
-                            <a href="/admin/signalement/delete/${s.id}" class="text-red-600 hover:text-red-800" onclick="return confirm('Supprimer ?')">Supprimer</a>
+                            <form action="/admin/signalement/delete/${s.id}" method="post" class="inline">
+                                <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
+                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm bg-transparent border-0 p-0 cursor-pointer" onclick="return confirm('Supprimer ce signalement ?')">Supprimer</button>
+                            </form>
                         </td>
                     </tr>
                 </g:each>
@@ -47,5 +50,6 @@
             </tbody>
         </table>
     </div>
+    <g:render template="/shared/pagination" model="[total: total, max: max, offset: offset]"/>
 </body>
 </html>

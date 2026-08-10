@@ -12,10 +12,15 @@ class TypeEquipementController {
 
     def list() {
         def q = params.q
-        def results = q ? TypeEquipement.createCriteria().list {
-            ilike("nom", "%${q}%")
-        } : TypeEquipement.list(sort: "nom")
-        [typeEquipementList: results]
+        int max = Math.min((params.max as Integer) ?: 20, 100)
+        int offset = Math.max(((params.offset as Integer) ?: 0).toInteger(), 0)
+        def results = TypeEquipement.createCriteria().list(max: max, offset: offset) {
+            if (q) {
+                ilike("nom", "%${q}%")
+            }
+            order("nom", "asc")
+        }
+        [typeEquipementList: results, total: results.totalCount, max: max, offset: offset]
     }
 
     def create() {

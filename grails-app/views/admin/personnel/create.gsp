@@ -13,12 +13,14 @@
             </div>
         </g:hasErrors>
         <form action="/admin/personnel/save" method="post">
+            <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div><label class="block text-sm font-semibold text-gray-700 mb-1">Nom</label><input type="text" name="nom" value="${personnel?.nom}" required class="w-full px-3 py-2 border border-gray-300 text-sm focus:outline-none focus:border-gray-600"/></div>
                 <div><label class="block text-sm font-semibold text-gray-700 mb-1">Prenom</label><input type="text" name="prenom" value="${personnel?.prenom}" required class="w-full px-3 py-2 border border-gray-300 text-sm focus:outline-none focus:border-gray-600"/></div>
             </div>
             <div class="mb-4"><label class="block text-sm font-semibold text-gray-700 mb-1">Email</label><input type="email" name="email" value="${personnel?.email}" required class="w-full px-3 py-2 border border-gray-300 text-sm focus:outline-none focus:border-gray-600"/></div>
-            <div class="mb-4"><label class="block text-sm font-semibold text-gray-700 mb-1">Mot de passe</label><input type="password" name="motDePasse" required class="w-full px-3 py-2 border border-gray-300 text-sm focus:outline-none focus:border-gray-600"/></div>
+            <div class="mb-4"><label class="block text-sm font-semibold text-gray-700 mb-1">Mot de passe</label><input type="password" name="motDePasse" required class="w-full px-3 py-2 border border-gray-300 text-sm focus:outline-none focus:border-gray-600"/>
+                <p class="text-xs text-gray-500 mt-1">8 caracteres minimum, avec une minuscule, une majuscule et un chiffre.</p></div>
             <div class="mb-4"><label class="block text-sm font-semibold text-gray-700 mb-1">Role</label>
                 <select name="role" class="w-full px-3 py-2 border border-gray-300 text-sm focus:outline-none focus:border-gray-600">
                     <option value="USER">Utilisateur</option>

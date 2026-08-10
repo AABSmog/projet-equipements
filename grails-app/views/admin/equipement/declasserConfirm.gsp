@@ -28,6 +28,7 @@
             </g:if>
         </dl>
         <form action="/admin/equipement/declasser/${equipement.id}" method="post">
+            <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
             <div class="flex gap-3">
                 <button type="submit" class="bg-red-600 text-white px-4 py-2 text-sm font-semibold hover:bg-red-700 transition-colors">Confirmer le declassement</button>
                 <a href="/admin/equipement/list" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 hover:border-gray-400 transition-colors">Annuler</a>

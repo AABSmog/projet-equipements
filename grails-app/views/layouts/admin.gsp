@@ -24,6 +24,9 @@
             <a href="/admin/affectation/historique" class="flex items-center px-4 py-2.5 text-sm ${request.forwardURI?.startsWith('/admin/affectation/historique') ? 'bg-maroon text-white font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white transition-colors'}">Historique des attributions</a>
             <a href="/admin/signalement/list" class="flex items-center px-4 py-2.5 text-sm ${request.forwardURI?.startsWith('/admin/signalement') ? 'bg-maroon text-white font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white transition-colors'}">Signalements</a>
             <a href="/admin/personnel/list" class="flex items-center px-4 py-2.5 text-sm ${request.forwardURI?.startsWith('/admin/personnel') ? 'bg-maroon text-white font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white transition-colors'}">Personnel</a>
+
+            <div class="mt-4 px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Suivi</div>
+            <a href="/admin/audit/list" class="flex items-center px-4 py-2.5 text-sm ${request.forwardURI?.startsWith('/admin/audit') ? 'bg-maroon text-white font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white transition-colors'}">Journal d'audit</a>
         </nav>
         <div class="border-t border-gray-700 p-3">
             <div class="text-xs text-gray-400 mb-1">${session.user?.prenom} ${session.user?.nom}</div>

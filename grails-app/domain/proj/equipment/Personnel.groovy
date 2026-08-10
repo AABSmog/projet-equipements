@@ -19,7 +19,20 @@ class Personnel {
         email blank: false, unique: true, email: true, maxSize: 254
         nom blank: false, maxSize: 100
         prenom blank: false, maxSize: 100
-        motDePasse blank: false, minSize: 6, maxSize: 72
+        motDePasse blank: false, minSize: 8, maxSize: 72, validator: { val, obj ->
+            if (!val || val.startsWith('\$2')) {
+                return true
+            }
+            if (!(val ==~ /.*[a-z].*/) || !(val ==~ /.*[A-Z].*/) || !(val ==~ /.*[0-9].*/)) {
+                return 'motDePasse.force.insuffisante'
+            }
+            return true
+        }
+    }
+
+    static mapping = {
+        email index: 'personnel_email_idx'
+        role index: 'personnel_role_idx'
     }
 
     String toString() { "$prenom $nom ($email)" }

@@ -14,6 +14,7 @@ class EquipementController {
 
     def validationMessagesService
     def affectationService
+    def auditService
 
     def index() {
         redirect(action: "list")
@@ -22,7 +23,9 @@ class EquipementController {
     def list() {
         def q = params.q
         def etatFiltre = params.etat
-        def results = Equipement.createCriteria().list {
+        int max = Math.min((params.max as Integer) ?: 10, 100)
+        int offset = Math.max(((params.offset as Integer) ?: 0).toInteger(), 0)
+        def results = Equipement.createCriteria().list(max: max, offset: offset) {
             if (q) {
                 or {
                     ilike("numeroSerie", "%${q}%")
@@ -35,7 +38,20 @@ class EquipementController {
             }
             order("id", "asc")
         }
-        [equipementList: results, typeEquipementList: TypeEquipement.list(sort: "nom")]
+        def ids = results*.id
+        def affectePar = [:]
+        if (ids) {
+            Affectation.createCriteria().list {
+                isNull("dateRetour")
+                inList("equipement.id", ids)
+            }.each { a ->
+                if (!affectePar.containsKey(a.equipement.id)) {
+                    affectePar[a.equipement.id] = a
+                }
+            }
+        }
+        [equipementList: results, total: results.totalCount, max: max, offset: offset,
+         affectePar: affectePar, typeEquipementList: TypeEquipement.list(sort: "nom")]
     }
 
     def create() {
@@ -73,6 +89,7 @@ class EquipementController {
         params['type.id'] = typeId
         def equipement = new Equipement(params)
         if (equipement.save(flush: true)) {
+            auditService.log(session.user, "CREATE", "Equipement", equipement.id, "${equipement.type?.nom} - ${equipement.numeroSerie}")
             flash.success = "Equipement cree"
             redirect(action: "list")
         } else {
@@ -131,6 +148,7 @@ class EquipementController {
         params['type.id'] = typeId
         equipement.properties = params
         if (equipement.save(flush: true)) {
+            auditService.log(session.user, "UPDATE", "Equipement", equipement.id, "etat=${equipement.etat}")
             flash.success = "Equipement mis a jour"
             redirect(action: "list")
         } else {
@@ -151,6 +169,7 @@ class EquipementController {
         }
         def result = affectationService.desaffecter(equipement)
         if (result.success) {
+            auditService.log(session.user, "DESAFFECTATION", "Equipement", equipement.id, equipement.numeroSerie)
             flash.success = result.message
         } else {
             flash.error = result.message
@@ -178,6 +197,7 @@ class EquipementController {
         }
         def result = affectationService.declasser(equipement)
         if (result.success) {
+            auditService.log(session.user, "DECLASSEMENT", "Equipement", equipement.id, equipement.numeroSerie)
             flash.success = result.message
         } else {
             flash.error = result.message
@@ -203,6 +223,7 @@ class EquipementController {
                 sig.save()
             }
             equipement.delete(flush: true)
+            auditService.log(session.user, "DELETE", "Equipement", params.id?.toLong(), info)
             flash.success = "Equipement supprime"
         }
         redirect(action: "list")

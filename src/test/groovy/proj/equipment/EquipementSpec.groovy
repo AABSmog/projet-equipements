@@ -98,7 +98,7 @@ class EquipementSpec extends Specification implements DataTest {
     void "un equipement affecte ne peut pas redevenir disponible tant que l affectation est active"() {
         given: "un equipement avec une affectation active"
         def t = type()
-        def pers = new Personnel(nom: "Diop", prenom: "Ali", email: "ali@example.com", motDePasse: "secret6").save(flush: true, failOnError: true)
+        def pers = new Personnel(nom: "Diop", prenom: "Ali", email: "ali@example.com", motDePasse: "Secret123").save(flush: true, failOnError: true)
         def e = new Equipement(type: t, description: "Poste").save(flush: true, failOnError: true)
         new Affectation(equipement: e, personnel: pers, dateAffectation: new Date()).save(flush: true, failOnError: true)
 

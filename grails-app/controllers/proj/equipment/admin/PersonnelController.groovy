@@ -12,17 +12,23 @@ class PersonnelController {
     static namespace = "admin"
 
     def validationMessagesService
+    def auditService
 
     def list() {
         def q = params.q
-        def results = q ? Personnel.createCriteria().list {
-            or {
-                ilike("nom", "%${q}%")
-                ilike("prenom", "%${q}%")
-                ilike("email", "%${q}%")
+        int max = Math.min((params.max as Integer) ?: 10, 100)
+        int offset = Math.max(((params.offset as Integer) ?: 0).toInteger(), 0)
+        def results = Personnel.createCriteria().list(max: max, offset: offset) {
+            if (q) {
+                or {
+                    ilike("nom", "%${q}%")
+                    ilike("prenom", "%${q}%")
+                    ilike("email", "%${q}%")
+                }
             }
-        } : Personnel.list(sort: "nom")
-        [personnelList: results]
+            order("nom", "asc")
+        }
+        [personnelList: results, total: results.totalCount, max: max, offset: offset]
     }
 
     def create() {
@@ -32,6 +38,7 @@ class PersonnelController {
     def save() {
         def personnel = new Personnel(params)
         if (personnel.save(flush: true)) {
+            auditService.log(session.user, "CREATE", "Personnel", personnel.id, personnel.email)
             flash.success = "Personnel cree"
             redirect(action: "list")
         } else {
@@ -65,6 +72,7 @@ class PersonnelController {
             personnel.motDePasse = params.motDePasse
         }
         if (personnel.save(flush: true)) {
+            auditService.log(session.user, "UPDATE", "Personnel", personnel.id, personnel.email)
             flash.success = "Personnel mis a jour"
             redirect(action: "list")
         } else {
@@ -89,6 +97,7 @@ class PersonnelController {
                 return
             }
             personnel.delete(flush: true)
+            auditService.log(session.user, "DELETE", "Personnel", personnel.id, personnel.email)
             flash.success = "Personnel supprime"
         }
         redirect(action: "list")

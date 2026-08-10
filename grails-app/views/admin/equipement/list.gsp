@@ -51,17 +51,23 @@
                                   'bg-gray-100 text-gray-800'}">${eq.etat?.label}</span>
                         </td>
                         <td class="px-4 py-3 text-gray-600">
-                            <g:if test="${eq.etat == proj.equipment.EtatEquipement.AFFECTE}">
-                                ${proj.equipment.Affectation.findByEquipementAndDateRetourIsNull(eq)?.personnel?.prenom} ${proj.equipment.Affectation.findByEquipementAndDateRetourIsNull(eq)?.personnel?.nom}
+                            <g:if test="${eq.etat == proj.equipment.EtatEquipement.AFFECTE && affectePar[eq.id]}">
+                                ${affectePar[eq.id].personnel?.prenom} ${affectePar[eq.id].personnel?.nom}
                             </g:if>
                             <g:else><span class="text-gray-400">-</span></g:else>
                         </td>
                         <td class="px-4 py-3">
                             <a href="/admin/equipement/edit/${eq.id}" class="text-gray-600 hover:text-gray-900 mr-3">Modifier</a>
                             <g:if test="${eq.etat == proj.equipment.EtatEquipement.AFFECTE}">
-                                <a href="/admin/equipement/desaffecter/${eq.id}" class="text-orange-600 hover:text-orange-800 mr-3">Desaffecter</a>
+                                <form action="/admin/equipement/desaffecter/${eq.id}" method="post" class="inline mr-3">
+                                    <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
+                                    <button type="submit" class="text-orange-600 hover:text-orange-800 text-sm bg-transparent border-0 p-0 cursor-pointer" onclick="return confirm('Desaffecter cet equipement ?')">Desaffecter</button>
+                                </form>
                             </g:if>
-                            <a href="/admin/equipement/declasser/${eq.id}" class="text-red-600 hover:text-red-800">Declasser</a>
+                            <form action="/admin/equipement/declasser/${eq.id}" method="post" class="inline">
+                                <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
+                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm bg-transparent border-0 p-0 cursor-pointer" onclick="return confirm('Declasser cet equipement ?')">Declasser</button>
+                            </form>
                         </td>
                     </tr>
                 </g:each>
@@ -71,5 +77,6 @@
             </tbody>
         </table>
     </div>
+    <g:render template="/shared/pagination" model="[total: total, max: max, offset: offset]"/>
 </body>
 </html>

@@ -1,0 +1,16 @@
+build/
+.gradle/
+out/
+data/
+node_modules/
+cookies*.txt
+*.log
+server-*.log
+server-seed.log
+gradle-out.txt
+.git/
+.idea/
+*.iml
+.env
+Thumbs.db
+.DS_Store

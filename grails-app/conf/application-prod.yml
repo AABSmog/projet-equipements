@@ -1,0 +1,34 @@
+---
+# Configuration de production : activee via -Dspring.profiles.active=prod
+# (ou SPRING_PROFILES_ACTIVE=prod). Surcharge uniquement les valeurs
+# qui doivent differer du developpement.
+---
+server:
+    servlet:
+        session:
+            cookie:
+                secure: true
+
+---
+dataSource:
+    # Le schema est cree/mis a jour au demarrage. Pour un controle strict du
+    # schema, migrer vers Flyway/Liquibase puis basculer sur 'validate'.
+    dbCreate: update
+    logSql: false
+
+---
+logging:
+    file:
+        name: ${LOG_FILE:logs/equipments.log}
+
+---
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health, info
+    endpoint:
+        health:
+            show-details: never
+            probes:
+                enabled: true

@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: equipments
+      POSTGRES_USER: equipments
+      POSTGRES_PASSWORD: ${EQUIPMENTS_DB_PASSWORD:?Mot de passe PostgreSQL obligatoire (variable EQUIPMENTS_DB_PASSWORD)}
+    volumes:
+      - equipments-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U equipments -d equipments"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  app:
+    build: .
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      PORT: 8080
+      EQUIPMENTS_DB_URL: jdbc:postgresql://db:5432/equipments
+      EQUIPMENTS_DB_USER: equipments
+      EQUIPMENTS_DB_PASSWORD: ${EQUIPMENTS_DB_PASSWORD:?Mot de passe PostgreSQL obligatoire (variable EQUIPMENTS_DB_PASSWORD)}
+      LOG_FILE: /var/log/equipments/equipments.log
+    volumes:
+      - equipments-logs:/var/log/equipments
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  equipments-data:
+  equipments-logs:

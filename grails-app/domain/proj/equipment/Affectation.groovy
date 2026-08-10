@@ -11,6 +11,13 @@ class Affectation {
 
     static belongsTo = [personnel: Personnel]
 
+    static mapping = {
+        equipement index: 'idx_affect_equipement'
+        personnel index: 'idx_affect_personnel'
+        dateAffectation index: 'idx_affect_date'
+        dateRetour index: 'idx_affect_retour'
+    }
+
     static constraints = {
         personnel nullable: false
         dateAffectation nullable: false

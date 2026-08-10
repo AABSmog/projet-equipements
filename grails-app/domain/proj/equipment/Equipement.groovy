@@ -8,6 +8,11 @@ class Equipement {
 
     static belongsTo = [type: TypeEquipement]
 
+    static mapping = {
+        type index: 'equipement_type_idx'
+        etat index: 'equipement_etat_idx'
+    }
+
     static constraints = {
         type nullable: false
         numeroSerie nullable: true, blank: false, unique: true, maxSize: 64

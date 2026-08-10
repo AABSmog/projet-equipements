@@ -1,6 +1,16 @@
 ---
 server:
-    port: 18080
+    port: ${PORT:18080}
+    compression:
+        enabled: true
+        min-response-size: 1024
+        mime-types: text/html,text/css,text/plain,application/javascript,application/json
+    servlet:
+        session:
+            timeout: 30m
+            cookie:
+                http-only: true
+                same-site: lax
 info:
     app:
         name: '@info.app.name@'
@@ -53,6 +63,23 @@ dataSource:
     dbCreate: update
     url: ${EQUIPMENTS_DB_URL:jdbc:postgresql://localhost:5432/Equipments}
     logSql: false
+    hikari:
+        maximumPoolSize: ${EQUIPMENTS_DB_POOL_MAX:10}
+        minimumIdle: ${EQUIPMENTS_DB_POOL_MIN:2}
+        connectionTimeout: 30000
+        idleTimeout: 600000
+        maxLifetime: 1800000
+
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health, info
+    endpoint:
+        health:
+            show-details: never
+            probes:
+                enabled: true
 
 hibernate:
     cache:
@@ -66,5 +93,14 @@ hibernate:
 # elle est surchargeable par les variables d'environnement DEMO_ADMIN_PASSWORD
 # et DEMO_USER_PASSWORD.
 demo:
-    adminPassword: ${DEMO_ADMIN_PASSWORD:admin123}
-    userPassword: ${DEMO_USER_PASSWORD:pass123}
+    adminPassword: ${DEMO_ADMIN_PASSWORD:Admin123}
+    userPassword: ${DEMO_USER_PASSWORD:User1234}
+
+security:
+    login:
+        maxAttempts: ${SECURITY_LOGIN_MAX_ATTEMPTS:5}
+        windowSeconds: ${SECURITY_LOGIN_WINDOW:900}
+        lockDurationSeconds: ${SECURITY_LOGIN_LOCK_DURATION:300}
+    register:
+        maxPerWindow: ${SECURITY_REGISTER_MAX:3}
+        windowSeconds: ${SECURITY_REGISTER_WINDOW:3600}

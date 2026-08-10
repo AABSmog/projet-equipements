@@ -14,6 +14,7 @@
         </div>
         <div class="bg-white">
             <form action="/login/attempt" method="post" class="p-6">
+                <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
                 <g:if test="${flash.error}">
                     <div class="bg-red-100 border border-red-200 px-4 py-3 mb-4 text-sm text-red-800">${flash.error}</div>
                 </g:if>

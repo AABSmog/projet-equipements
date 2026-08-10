@@ -10,6 +10,12 @@ class Signalement {
 
     static belongsTo = [personnel: Personnel]
 
+    static mapping = {
+        equipement index: 'idx_signalement_equipement'
+        personnel index: 'idx_signalement_personnel'
+        dateCreated index: 'idx_signalement_date'
+    }
+
     static constraints = {
         description blank: false, maxSize: 1000
         type nullable: false

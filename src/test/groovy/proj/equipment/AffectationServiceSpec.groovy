@@ -11,7 +11,7 @@ class AffectationServiceSpec extends Specification implements ServiceUnitTest<Af
     }
 
     private Personnel personnel(String nom = "Diop", String prenom = "Ali", String email = "ali@example.com") {
-        new Personnel(nom: nom, prenom: prenom, email: email, motDePasse: "secret6").save(flush: true, failOnError: true)
+        new Personnel(nom: nom, prenom: prenom, email: email, motDePasse: "Secret123").save(flush: true, failOnError: true)
     }
 
     private Equipement equipementDisponible() {

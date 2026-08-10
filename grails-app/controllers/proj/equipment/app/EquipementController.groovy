@@ -10,11 +10,19 @@ class EquipementController {
     static namespace = "app"
 
     def affectationService
+    def auditService
 
     def list() {
         def user = session.user
-        def affectations = Affectation.findAllByPersonnelAndDateRetourIsNull(user, [sort: "dateAffectation", order: "desc"])
-        [affectationList: affectations]
+        int max = Math.min((params.max as Integer) ?: 10, 100)
+        int offset = Math.max(((params.offset as Integer) ?: 0).toInteger(), 0)
+        def results = Affectation.createCriteria().list(max: max, offset: offset) {
+            eq("personnel", user)
+            isNull("dateRetour")
+            fetchMode('equipement', org.hibernate.FetchMode.JOIN)
+            order("dateAffectation", "desc")
+        }
+        [affectationList: results, total: results.totalCount, max: max, offset: offset]
     }
 
     def show() {
@@ -37,6 +45,7 @@ class EquipementController {
         }
         def result = affectationService.restituer(equipement, session.user, params.raisonRetour)
         if (result.success) {
+            auditService.log(session.user, "RETOUR", "Equipement", equipement.id, params.raisonRetour)
             flash.success = result.message
         } else {
             flash.error = result.message

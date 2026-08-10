@@ -15,7 +15,7 @@ class AffectationSpec extends Specification implements DataTest {
     }
 
     private Personnel personnel() {
-        new Personnel(nom: "Diop", prenom: "Ali", email: "ali@example.com", motDePasse: "secret6").save(flush: true, failOnError: true)
+        new Personnel(nom: "Diop", prenom: "Ali", email: "ali@example.com", motDePasse: "Secret123").save(flush: true, failOnError: true)
     }
 
     void "une affectation valide est sauvegarde"() {
