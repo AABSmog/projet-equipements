@@ -63,9 +63,8 @@ class LoginController {
         Personnel.withTransaction { status ->
             if (personnel.save(flush: true)) {
                 loginAttemptService.registerRegistration(ipKey)
-                flash.success = "Compte cree avec succes. Votre email de connexion est: ${params.email}"
-                session.user = personnel
-                redirect(uri: "/app")
+                flash.success = "Compte cree avec succes. Connectez-vous avec votre email: ${params.email}"
+                redirect(controller: "login", action: "index")
             } else {
                 flash.error = validationMessagesService.message(personnel) ?: "Erreur lors de la creation du compte"
                 render(view: "/register/index", model: [personnel: personnel])

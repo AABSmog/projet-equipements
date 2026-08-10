@@ -4,6 +4,7 @@ import proj.equipment.Affectation
 import proj.equipment.Equipement
 import proj.equipment.Personnel
 import org.hibernate.FetchMode
+import org.hibernate.sql.JoinType
 
 class AffectationController {
 
@@ -18,14 +19,17 @@ class AffectationController {
             fetchMode('attribuePar', FetchMode.JOIN)
             fetchMode('equipement', FetchMode.JOIN)
             if (q) {
+                def pattern = "%${q}%"
+                createAlias("personnel", "p")
+                createAlias("attribuePar", "ap", JoinType.LEFT_OUTER_JOIN)
                 or {
-                    personnel { ilike("nom", "%${q}%") }
-                    attribuePar { ilike("nom", "%${q}%") }
-                    ilike("infoEquipement", "%${q}%")
-                    and {
-                        isNotNull("equipement")
-                        equipement { ilike("numeroSerie", "%${q}%") }
-                    }
+                    ilike("p.nom", pattern)
+                    ilike("p.prenom", pattern)
+                    ilike("ap.nom", pattern)
+                    ilike("ap.prenom", pattern)
+                    ilike("infoEquipement", pattern)
+                    equipement { ilike("numeroSerie", pattern) }
+                    equipement { type { ilike("nom", pattern) } }
                 }
             }
             tri.call(delegate)
