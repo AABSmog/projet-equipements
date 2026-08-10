@@ -19,3 +19,8 @@ new *.txt
 gradle-out.txt
 server-startup.log
 *.log
+
+# Secrets et configuration locale
+.env
+*.env
+grails-app/conf/application-local*.yml

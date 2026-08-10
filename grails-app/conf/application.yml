@@ -48,10 +48,10 @@ grails:
 dataSource:
     pooled: true
     driverClassName: org.postgresql.Driver
-    username: postgres
-    password: changeme
+    username: ${EQUIPMENTS_DB_USER:postgres}
+    password: ${EQUIPMENTS_DB_PASSWORD}
     dbCreate: update
-    url: jdbc:postgresql://localhost:5432/Equipments
+    url: ${EQUIPMENTS_DB_URL:jdbc:postgresql://localhost:5432/Equipments}
     logSql: false
 
 hibernate:
@@ -60,3 +60,11 @@ hibernate:
         use_second_level_cache: false
         use_query_cache: false
     dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# Identifiants du jeu de donnees de demonstration (developpement uniquement).
+# La valeur par defaut est un mot de passe de demonstration volontairement public ;
+# elle est surchargeable par les variables d'environnement DEMO_ADMIN_PASSWORD
+# et DEMO_USER_PASSWORD.
+demo:
+    adminPassword: ${DEMO_ADMIN_PASSWORD:admin123}
+    userPassword: ${DEMO_USER_PASSWORD:pass123}
