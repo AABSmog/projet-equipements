@@ -3,12 +3,13 @@ package proj.equipment.app
 import proj.equipment.Equipement
 import proj.equipment.Affectation
 import proj.equipment.Signalement
-import proj.equipment.EtatEquipement
 import proj.equipment.TypeEquipement
 
 class EquipementController {
 
     static namespace = "app"
+
+    def affectationService
 
     def list() {
         def user = session.user
@@ -34,20 +35,12 @@ class EquipementController {
             redirect(action: "list")
             return
         }
-        def affectation = Affectation.findByEquipementAndPersonnelAndDateRetourIsNull(equipement, session.user)
-        if (!affectation) {
-            flash.error = "Aucune affectation active pour cet equipement"
-            redirect(action: "list")
-            return
+        def result = affectationService.restituer(equipement, session.user, params.raisonRetour)
+        if (result.success) {
+            flash.success = result.message
+        } else {
+            flash.error = result.message
         }
-        Affectation.withTransaction { status ->
-            affectation.dateRetour = new Date()
-            affectation.raisonRetour = params.raisonRetour ?: "Retour volontaire"
-            affectation.save(flush: true)
-            equipement.etat = EtatEquipement.DISPONIBLE
-            equipement.save(flush: true)
-        }
-        flash.success = "Equipement retourne avec succes"
         redirect(action: "list")
     }
 }

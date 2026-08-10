@@ -2,12 +2,13 @@ package proj.equipment.admin
 
 import proj.equipment.Affectation
 import proj.equipment.Equipement
-import proj.equipment.EtatEquipement
 import proj.equipment.Personnel
 
 class AffectationController {
 
     static namespace = "admin"
+
+    def affectationService
 
     def list() {
         def q = params.q
@@ -24,49 +25,42 @@ class AffectationController {
         [affectationList: results]
     }
 
+    def historique() {
+        def q = params.q
+        def results = q ? Affectation.createCriteria().list {
+            or {
+                personnel { ilike("nom", "%${q}%") }
+                attribuePar { ilike("nom", "%${q}%") }
+                ilike("infoEquipement", "%${q}%")
+                and {
+                    isNotNull("equipement")
+                    equipement { ilike("numeroSerie", "%${q}%") }
+                }
+            }
+            order("dateAffectation", "desc")
+        } : Affectation.list(sort: "dateAffectation", order: "desc")
+        [affectationList: results]
+    }
+
     def affecter() {
         def equipement = Equipement.get(params.equipementId)
         def personnel = Personnel.get(params.personnelId)
-        if (equipement && personnel && equipement.etat == EtatEquipement.DISPONIBLE) {
-            def ok = false
-            Affectation.withTransaction { status ->
-                def affectation = new Affectation(
-                    equipement: equipement,
-                    personnel: personnel,
-                    dateAffectation: new Date()
-                )
-                affectation.save(flush: true)
-                equipement.etat = EtatEquipement.AFFECTE
-                if (affectation.hasErrors() || !equipement.save(flush: true)) {
-                    status.setRollbackOnly()
-                } else {
-                    ok = true
-                }
-            }
-            if (ok) {
-                flash.success = "Equipement affecte a ${personnel.prenom} ${personnel.nom}"
-            } else {
-                flash.error = "Impossible d'affecter cet equipement"
-            }
+        def result = affectationService.attribuer(equipement, personnel, session.user)
+        if (result.success) {
+            flash.success = result.message
         } else {
-            flash.error = "Impossible d'affecter cet equipement"
+            flash.error = result.message
         }
         redirect(action: "list")
     }
 
     def retour() {
         def affectation = Affectation.get(params.id)
-        if (affectation) {
-            Affectation.withTransaction { status ->
-                affectation.dateRetour = new Date()
-                affectation.raisonRetour = params.raisonRetour
-                affectation.save(flush: true)
-                if (affectation.equipement) {
-                    affectation.equipement.etat = EtatEquipement.DISPONIBLE
-                    affectation.equipement.save(flush: true)
-                }
-            }
-            flash.success = "Retour enregistre"
+        def result = affectationService.restituer(affectation, params.raisonRetour)
+        if (result.success) {
+            flash.success = result.message
+        } else {
+            flash.error = result.message
         }
         redirect(action: "list")
     }

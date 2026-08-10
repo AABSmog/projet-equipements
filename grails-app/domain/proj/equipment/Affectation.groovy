@@ -3,6 +3,7 @@ package proj.equipment
 class Affectation {
     Equipement equipement
     Personnel personnel
+    Personnel attribuePar
     Date dateAffectation
     Date dateRetour
     String raisonRetour
@@ -13,6 +14,7 @@ class Affectation {
     static constraints = {
         personnel nullable: false
         dateAffectation nullable: false
+        attribuePar nullable: true
         dateRetour nullable: true, validator: { val, obj ->
             if (val && obj.dateAffectation && val.before(obj.dateAffectation)) {
                 return 'affectation.dateRetour.anterieur'

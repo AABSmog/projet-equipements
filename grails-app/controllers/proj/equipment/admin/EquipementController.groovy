@@ -13,6 +13,7 @@ class EquipementController {
     static namespace = "admin"
 
     def validationMessagesService
+    def affectationService
 
     def index() {
         redirect(action: "list")
@@ -143,18 +144,16 @@ class EquipementController {
 
     def desaffecter() {
         def equipement = Equipement.get(params.id)
-        if (equipement && equipement.etat == EtatEquipement.AFFECTE) {
-            def affectation = Affectation.findByEquipementAndDateRetourIsNull(equipement)
-            if (affectation) {
-                affectation.dateRetour = new Date()
-                affectation.raisonRetour = "Desaffecte par l'administrateur"
-                affectation.save(flush: true)
-            }
-            equipement.etat = EtatEquipement.DISPONIBLE
-            equipement.save(flush: true)
-            flash.success = "Equipement desaffecte"
+        if (!equipement) {
+            flash.error = "Equipement introuvable"
+            redirect(action: "list")
+            return
+        }
+        def result = affectationService.desaffecter(equipement)
+        if (result.success) {
+            flash.success = result.message
         } else {
-            flash.error = "Cet equipement n'est pas affecte"
+            flash.error = result.message
         }
         redirect(action: "list")
     }
@@ -177,18 +176,12 @@ class EquipementController {
             redirect(action: "list")
             return
         }
-        if (equipement.etat == EtatEquipement.AFFECTE) {
-            def affectation = Affectation.findByEquipementAndDateRetourIsNull(equipement)
-            if (affectation) {
-                affectation.dateRetour = new Date()
-                affectation.raisonRetour = "Equipement déclasse"
-                affectation.infoEquipement = "${equipement.type?.nom} - ${equipement.numeroSerie} (declasse)"
-                affectation.save(flush: true)
-            }
+        def result = affectationService.declasser(equipement)
+        if (result.success) {
+            flash.success = result.message
+        } else {
+            flash.error = result.message
         }
-        equipement.etat = EtatEquipement.HORS_SERVICE
-        equipement.save(flush: true)
-        flash.success = "Equipement de classe"
         redirect(action: "list")
     }
 

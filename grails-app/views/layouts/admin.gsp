@@ -20,7 +20,8 @@
 
             <div class="mt-4 px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Gestion</div>
             <a href="/admin/equipement/list" class="flex items-center px-4 py-2.5 text-sm ${request.forwardURI?.startsWith('/admin/equipement') ? 'bg-maroon text-white font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white transition-colors'}">Equipements</a>
-            <a href="/admin/affectation/list" class="flex items-center px-4 py-2.5 text-sm ${request.forwardURI?.startsWith('/admin/affectation') ? 'bg-maroon text-white font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white transition-colors'}">Affectations</a>
+            <a href="/admin/affectation/list" class="flex items-center px-4 py-2.5 text-sm ${request.forwardURI?.startsWith('/admin/affectation/list') ? 'bg-maroon text-white font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white transition-colors'}">Affectations</a>
+            <a href="/admin/affectation/historique" class="flex items-center px-4 py-2.5 text-sm ${request.forwardURI?.startsWith('/admin/affectation/historique') ? 'bg-maroon text-white font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white transition-colors'}">Historique des attributions</a>
             <a href="/admin/signalement/list" class="flex items-center px-4 py-2.5 text-sm ${request.forwardURI?.startsWith('/admin/signalement') ? 'bg-maroon text-white font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white transition-colors'}">Signalements</a>
             <a href="/admin/personnel/list" class="flex items-center px-4 py-2.5 text-sm ${request.forwardURI?.startsWith('/admin/personnel') ? 'bg-maroon text-white font-medium' : 'text-gray-300 hover:bg-gray-800 hover:text-white transition-colors'}">Personnel</a>
         </nav>
