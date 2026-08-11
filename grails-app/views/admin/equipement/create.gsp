@@ -3,6 +3,7 @@
 <head>
     <meta name="layout" content="admin"/>
     <title>Nouvel equipement</title>
+    <asset:javascript src="nouveauType.js"/>
 </head>
 <body>
     <h1 class="text-xl font-bold text-gray-900 mb-6">Nouvel equipement</h1>
@@ -12,7 +13,7 @@
             <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
             <div class="mb-4">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Type <span class="text-red-500">*</span></label>
-                <select name="type.id" id="typeSelect" onchange="toggleNouveauType()" class="w-full px-3 py-2 border ${equipement?.errors?.getFieldErrors('type') ? 'border-red-500' : 'border-gray-300'} text-sm focus:outline-none focus:border-gray-600">
+                <select name="type.id" id="typeSelect" class="w-full px-3 py-2 border ${equipement?.errors?.getFieldErrors('type') ? 'border-red-500' : 'border-gray-300'} text-sm focus:outline-none focus:border-gray-600">
                     <option value="">-- Selectionner --</option>
                     <g:each var="t" in="${typeEquipementList}">
                         <option value="${t.id}">${t.nom}</option>
@@ -24,17 +25,6 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Nouveau type <span class="text-red-500">*</span></label>
                 <input type="text" name="nouveauType" id="nouveauType" class="w-full px-3 py-2 border border-gray-300 text-sm focus:outline-none focus:border-gray-600"/>
             </div>
-            <script>
-                function toggleNouveauType() {
-                    var sel = document.getElementById('typeSelect');
-                    var div = document.getElementById('nouveauTypeDiv');
-                    if (sel.value === 'autre') {
-                        div.classList.remove('hidden');
-                    } else {
-                        div.classList.add('hidden');
-                    }
-                }
-            </script>
             <input type="hidden" name="etat" value="DISPONIBLE"/>
             <div class="mb-4">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Description <span class="text-red-500">*</span></label>

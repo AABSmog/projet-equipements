@@ -8,6 +8,7 @@
         var eqInput = document.getElementById('eqInput');
         var eqMenu = document.getElementById('eqMenu');
         var eqId = document.getElementById('eqId');
+        var eqType = document.getElementById('eqType');
         var persInput = document.getElementById('persInput');
         var persMenu = document.getElementById('persMenu');
         var persId = document.getElementById('persId');
@@ -57,9 +58,12 @@
         function eqSearch() {
             showDrop(eqInput, eqMenu);
             var q = eqInput.value.trim();
+            var typeId = eqType ? eqType.value : '';
             clearTimeout(eqTimer);
             eqTimer = setTimeout(function () {
-                fetch('/admin/affectation/rechercherEquipements?q=' + encodeURIComponent(q))
+                var url = '/admin/affectation/rechercherEquipements?q=' + encodeURIComponent(q);
+                if (typeId) { url += '&typeId=' + encodeURIComponent(typeId); }
+                fetch(url)
                     .then(function (r) { return r.json(); })
                     .then(function (items) { renderItems(eqMenu, items, function (it) { pickItem(it, eqInput, eqId, eqMenu); }); })
                     .catch(function () {});
@@ -80,6 +84,7 @@
 
         eqInput.addEventListener('focus', eqSearch);
         eqInput.addEventListener('input', eqSearch);
+        if (eqType) { eqType.addEventListener('change', eqSearch); }
         persInput.addEventListener('focus', persSearch);
         persInput.addEventListener('input', persSearch);
 

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title><g:layoutTitle default="Admin - Gestion Equipements"/></title>
     <asset:stylesheet src="tailwind.css"/>
+    <asset:javascript src="flash.js"/>
     <g:layoutHead/>
 </head>
 <body class="bg-gray-50 font-sans antialiased">

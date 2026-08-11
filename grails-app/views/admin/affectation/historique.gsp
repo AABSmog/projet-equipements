@@ -28,6 +28,7 @@
                     <th class="px-4 py-3 font-semibold text-gray-700">Date retour</th>
                     <th class="px-4 py-3 font-semibold text-gray-700">Raison du retour</th>
                     <th class="px-4 py-3 font-semibold text-gray-700">Statut</th>
+                    <th class="px-4 py-3 font-semibold text-gray-700">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -53,10 +54,22 @@
                                 <span class="text-xs font-semibold px-2 py-1 bg-blue-100 text-blue-800">En cours</span>
                             </g:else>
                         </td>
+                        <td class="px-4 py-3">
+                            <g:if test="${!a.dateRetour}">
+                                <form action="/admin/affectation/retour" method="post" class="flex gap-1 items-center">
+                                    <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
+                                    <input type="hidden" name="id" value="${a.id}"/>
+                                    <g:if test="${params.q}"><input type="hidden" name="q" value="${params.q}"/></g:if>
+                                    <input type="text" name="raisonRetour" placeholder="Motif (optionnel)" class="w-36 px-2 py-1 border border-gray-300 text-xs focus:outline-none focus:border-gray-600"/>
+                                    <button type="submit" class="px-2 py-1 bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 transition-colors">Retour</button>
+                                </form>
+                            </g:if>
+                            <g:else><span class="text-gray-300">-</span></g:else>
+                        </td>
                     </tr>
                 </g:each>
                 <g:if test="${!affectationList}">
-                    <tr><td colspan="8" class="px-4 py-8 text-center text-gray-400">Aucune attribution dans l'historique</td></tr>
+                    <tr><td colspan="9" class="px-4 py-8 text-center text-gray-400">Aucune attribution dans l'historique</td></tr>
                 </g:if>
             </tbody>
         </table>

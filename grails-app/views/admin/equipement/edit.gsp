@@ -3,6 +3,7 @@
 <head>
     <meta name="layout" content="admin"/>
     <title>Modifier equipement</title>
+    <asset:javascript src="nouveauType.js"/>
 </head>
 <body>
     <h1 class="text-xl font-bold text-gray-900 mb-6">Modifier equipement</h1>
@@ -13,7 +14,7 @@
             <input type="hidden" name="id" value="${equipement.id}"/>
             <div class="mb-4">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Type</label>
-                <select name="type.id" id="typeSelect" onchange="toggleNouveauType()" class="w-full px-3 py-2 border border-gray-300 text-sm focus:outline-none focus:border-gray-600">
+                <select name="type.id" id="typeSelect" class="w-full px-3 py-2 border border-gray-300 text-sm focus:outline-none focus:border-gray-600">
                     <option value="">-- Selectionner --</option>
                     <g:each var="t" in="${typeEquipementList}">
                         <option value="${t.id}" ${t.id == equipement.type?.id ? 'selected' : ''}>${t.nom}</option>
@@ -25,17 +26,6 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Nouveau type <span class="text-red-500">*</span></label>
                 <input type="text" name="nouveauType" id="nouveauType" class="w-full px-3 py-2 border border-gray-300 text-sm focus:outline-none focus:border-gray-600"/>
             </div>
-            <script>
-                function toggleNouveauType() {
-                    var sel = document.getElementById('typeSelect');
-                    var div = document.getElementById('nouveauTypeDiv');
-                    if (sel.value === 'autre') {
-                        div.classList.remove('hidden');
-                    } else {
-                        div.classList.add('hidden');
-                    }
-                }
-            </script>
             <div class="mb-4">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">N° Serie</label>
                 <div class="px-3 py-2 border border-gray-300 text-sm bg-gray-100 text-gray-600">${equipement?.numeroSerie}</div>

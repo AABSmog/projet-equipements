@@ -5,6 +5,7 @@ import proj.equipment.Affectation
 import proj.equipment.Equipement
 import proj.equipment.EtatEquipement
 import proj.equipment.Personnel
+import proj.equipment.TypeEquipement
 import org.hibernate.FetchMode
 import org.hibernate.sql.JoinType
 
@@ -45,6 +46,7 @@ class AffectationController {
         def q = params.q
         def model = [:]
         model.putAll(listeAvecFetch(max, offset, q, { c -> c.order("dateAffectation", "desc") }))
+        model.typeEquipementList = TypeEquipement.list(sort: "nom")
         model
     }
 
@@ -80,19 +82,26 @@ class AffectationController {
         } else {
             flash.error = result.message
         }
-        redirect(action: "list")
+        redirect(action: "historique", params: params.q ? [q: params.q] : [:])
     }
 
     def rechercherEquipements() {
         String q = params.q?.toString()?.trim()
+        Long typeId = params.typeId?.isLong() ? params.typeId.toLong() : null
         def results = Equipement.createCriteria().list(max: 20) {
             eq("etat", EtatEquipement.DISPONIBLE)
+            if (typeId || q) {
+                createAlias("type", "t")
+            }
+            if (typeId) {
+                eq("t.id", typeId)
+            }
             if (q) {
                 def pattern = "%${q}%"
                 or {
                     ilike("numeroSerie", pattern)
                     ilike("description", pattern)
-                    type { ilike("nom", pattern) }
+                    ilike("t.nom", pattern)
                 }
             }
             order("numeroSerie", "asc")

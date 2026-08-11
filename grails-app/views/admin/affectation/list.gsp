@@ -13,6 +13,15 @@
         <form action="/admin/affectation/affecter" method="post" class="flex gap-2 items-end">
             <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
             <div class="flex-1">
+                <label class="block text-xs text-gray-500 mb-0.5">Type (filtre)</label>
+                <select id="eqType" class="w-full px-2 py-1.5 border border-gray-300 text-xs focus:outline-none focus:border-gray-600">
+                    <option value="">Tous les types</option>
+                    <g:each var="t" in="${typeEquipementList}">
+                        <option value="${t.id}">${t.nom}</option>
+                    </g:each>
+                </select>
+            </div>
+            <div class="flex-1">
                 <label class="block text-xs text-gray-500 mb-0.5">Equipement</label>
                 <div>
                     <input type="text" id="eqInput" placeholder="Tapez pour rechercher (type, N serie)..." autocomplete="off" class="w-full px-2 py-1.5 border border-gray-300 text-xs focus:outline-none focus:border-gray-600"/>
