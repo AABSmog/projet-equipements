@@ -1,7 +1,9 @@
 package proj.equipment.admin
 
+import grails.converters.JSON
 import proj.equipment.Affectation
 import proj.equipment.Equipement
+import proj.equipment.EtatEquipement
 import proj.equipment.Personnel
 import org.hibernate.FetchMode
 import org.hibernate.sql.JoinType
@@ -79,5 +81,42 @@ class AffectationController {
             flash.error = result.message
         }
         redirect(action: "list")
+    }
+
+    def rechercherEquipements() {
+        String q = params.q?.toString()?.trim()
+        def results = Equipement.createCriteria().list(max: 20) {
+            eq("etat", EtatEquipement.DISPONIBLE)
+            if (q) {
+                def pattern = "%${q}%"
+                or {
+                    ilike("numeroSerie", pattern)
+                    ilike("description", pattern)
+                    type { ilike("nom", pattern) }
+                }
+            }
+            order("numeroSerie", "asc")
+        }
+        render(results.collect {
+            [id: it.id, label: "${it.type?.nom ?: ''} - ${it.numeroSerie}".replaceAll('^ - ', ''), numeroSerie: it.numeroSerie]
+        } as JSON)
+    }
+
+    def rechercherPersonnel() {
+        String q = params.q?.toString()?.trim()
+        def results = Personnel.createCriteria().list(max: 20) {
+            if (q) {
+                def pattern = "%${q}%"
+                or {
+                    ilike("nom", pattern)
+                    ilike("prenom", pattern)
+                }
+            }
+            order("nom", "asc")
+            order("prenom", "asc")
+        }
+        render(results.collect {
+            [id: it.id, label: "${it.prenom} ${it.nom}"]
+        } as JSON)
     }
 }
