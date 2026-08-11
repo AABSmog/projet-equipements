@@ -13,17 +13,10 @@
             <p class="text-gray-400 text-sm mt-1">Creez votre compte</p>
         </div>
         <div class="bg-white">
-            <g:hasErrors bean="${personnel}">
-                <div class="bg-red-100 border border-red-200 px-4 py-3 mb-0 text-sm text-red-800">
-                    <span class="font-semibold">Erreurs :</span><br/>
-                    <g:eachError bean="${personnel}"><g:message error="${it}"/><br/></g:eachError>
-                </div>
-            </g:hasErrors>
-            <g:if test="${flash.error}">
-                <div class="bg-red-100 border border-red-200 px-4 py-3 mb-0 text-sm text-red-800">${flash.error}</div>
-            </g:if>
             <form action="/register/save" method="post" class="p-6">
                 <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
+                <g:render template="/shared/formErrors" model="[bean: personnel]"/>
+                <g:render template="/shared/flash"/>
                 <div class="grid grid-cols-2 gap-3 mb-3">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1" for="nom">Nom <span class="text-red-500">*</span></label>

@@ -15,12 +15,7 @@
         <div class="bg-white">
             <form action="/login/attempt" method="post" class="p-6">
                 <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
-                <g:if test="${flash.error}">
-                    <div class="bg-red-100 border border-red-200 px-4 py-3 mb-4 text-sm text-red-800">${flash.error}</div>
-                </g:if>
-                <g:if test="${flash.success}">
-                    <div class="bg-green-100 border border-green-200 px-4 py-3 mb-4 text-sm text-green-800">${flash.success}</div>
-                </g:if>
+                <g:render template="/shared/flash"/>
                 <div class="mb-4">
                     <label class="block text-sm font-semibold text-gray-700 mb-1" for="email">Email</label>
                     <input type="email" name="email" id="email" required

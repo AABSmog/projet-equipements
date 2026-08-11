@@ -35,12 +35,9 @@
     </aside>
 
     <main class="flex-1 overflow-y-auto">
-        <g:if test="${flash.success}">
-            <div class="bg-green-100 border-b border-green-200 px-6 py-3 text-sm text-green-800">${flash.success}</div>
-        </g:if>
-        <g:if test="${flash.error}">
-            <div class="bg-red-100 border-b border-red-200 px-6 py-3 text-sm text-red-800">${flash.error}</div>
-        </g:if>
+        <div class="px-6 pt-5">
+            <g:render template="/shared/flash"/>
+        </div>
         <div class="p-6">
             <g:layoutBody/>
         </div>

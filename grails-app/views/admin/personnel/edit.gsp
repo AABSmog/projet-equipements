@@ -7,12 +7,7 @@
 <body>
     <h1 class="text-xl font-bold text-gray-900 mb-6">Modifier personnel</h1>
     <div class="bg-white border border-gray-200 p-6 max-w-lg">
-        <g:hasErrors bean="${personnel}">
-            <div class="bg-red-100 border border-red-200 px-4 py-3 mb-4 text-sm text-red-800">
-                <span class="font-semibold">Erreurs :</span><br/>
-                <g:eachError bean="${personnel}"><g:message error="${it}"/><br/></g:eachError>
-            </div>
-        </g:hasErrors>
+        <g:render template="/shared/formErrors" model="[bean: personnel]"/>
         <form action="/admin/personnel/update" method="post">
             <input type="hidden" name="_csrf" value="${session.csrfToken}"/>
             <input type="hidden" name="id" value="${personnel.id}"/>
