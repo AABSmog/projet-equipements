@@ -2,7 +2,7 @@
 
 Document recensant les limites, points faibles et anomalies non traitées de l'application
 de gestion d'équipements. Il complète les cahiers de recette (`cahiers-de-recette/`).
-Mise à jour : v2 (2026-08-10).
+Mise à jour : v2 (2026-08-11 — recette v2, 43 scénarios 100 % OK).
 
 ## Anomalies traitées dans cette version (renforcement)
 
@@ -57,8 +57,11 @@ Mise à jour : v2 (2026-08-10).
 - **Couverte partiellement** : `ValidationMessagesService` traduit les principaux codes ; certains retombent encore sur le message générique anglais ou « Une ou plusieurs saisies sont invalides. ».
 
 ### Tests
-- **Suite automatisée partielle** : 43 tests unitaires + 2 tests d'intégration (Spock), mais les écrans à ancrage visuel (GSP) restent validés manuellement via les cahiers de recette (`recette-v1.md`).
+- **Suite automatisée partielle** : 43 tests unitaires + 2 tests d'intégration (Spock, 45 OK — voir `src/test` et `src/integration-test`), mais les écrans à ancrage visuel (GSP) restent validés manuellement via les cahiers de recette (`recette-v1.md`, `recette-v2.md`). La v2 (11/08/2026) vérifie 43 scénarios dont les cas limites `matériel déjà attribué`, `restitution sans attribution` et `saisies invalides`.
+
+### Recette
+- **Recette v2 (11/08/2026)** : 43 scénarios, 43 OK, 0 KO — les 2 KO bloquants de la v1 (création sans N° série, type orphelin) sont corrigés et rejoués avec succès (S10/S11). Le cahier complet est dans `cahiers-de-recette/recette-v2.md`.
 
 ## Note
 La base de données doit être conservée dans l'état « seed » décrit en fin de `cahiers-de-recette/recette-v1.md`
-avant chaque exécution de recette.
+avant chaque exécution de recette. La recette v2 s'appuie sur la même graine, reseedée au début de la campagne.
