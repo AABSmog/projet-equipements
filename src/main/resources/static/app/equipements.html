@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Mes equipements</title>
+    <link rel="stylesheet" href="/css/tailwind.css"/>
+</head>
+<body data-admin="0" data-active="/app/equip" class="bg-gray-50 font-sans antialiased">
+    <div id="layout-root" class="flex h-screen overflow-hidden" style="display:none">
+        <div id="app-nav"></div>
+        <main class="flex-1 overflow-y-auto">
+            <div class="px-6 pt-5"><div id="flash-container"></div></div>
+            <div class="p-6">
+                <h1 class="text-xl font-bold text-gray-900 mb-6">Mes equipements</h1>
+                <div class="bg-white border border-gray-200 overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-100 text-left">
+                                <th class="px-4 py-3 font-semibold text-gray-700">Equipement</th>
+                                <th class="px-4 py-3 font-semibold text-gray-700">N° Serie</th>
+                                <th class="px-4 py-3 font-semibold text-gray-700">Description</th>
+                                <th class="px-4 py-3 font-semibold text-gray-700">Affecte le</th>
+                                <th class="px-4 py-3 font-semibold text-gray-700">Etat</th>
+                                <th class="px-4 py-3 font-semibold text-gray-700">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rows"></tbody>
+                    </table>
+                </div>
+                <div id="pagination"></div>
+            </div>
+        </main>
+    </div>
+    <script src="/js/api.js"></script>
+    <script src="/js/layout.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/pages/app-equipements.js"></script>
+</body>
+</html>

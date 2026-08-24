@@ -1,0 +1,66 @@
+micronaut:
+  application:
+    name: Proj-Equipment
+    default-charset: UTF-8
+  server:
+    port: ${PORT:8080}
+    netty:
+      access-logger:
+        enabled: false
+  session:
+    http:
+      enabled: true
+      update: false
+      cookie:
+        enabled: true
+        httpOnly: true
+        sameSite: lax
+        secure: ${SESSION_COOKIE_SECURE:false}
+        maxAge: 30m
+  router:
+    static-resources:
+      default:
+        enabled: true
+        mapping: /**
+        paths: classpath:static
+
+datasources:
+  default:
+    url: ${EQUIPMENTS_DB_URL:`jdbc:postgresql://127.0.0.1:5432/Equipments`}
+    driverClassName: org.postgresql.Driver
+    username: ${EQUIPMENTS_DB_USER:postgres}
+    password: ${EQUIPMENTS_DB_PASSWORD}
+    maxPoolSize: ${EQUIPMENTS_DB_POOL_MAX:10}
+    minIdle: ${EQUIPMENTS_DB_POOL_MIN:2}
+    dialect: POSTGRES
+
+hibernate:
+  hbm2ddl:
+    auto: ${EQUIPMENTS_DB_DDL:validate}
+  show_sql: ${EQUIPMENTS_DB_LOG_SQL:false}
+  format_sql: false
+  cache:
+    queries: false
+    use_second_level_cache: false
+    use_query_cache: false
+
+app:
+  demo:
+    adminPassword: ${DEMO_ADMIN_PASSWORD:Admin123}
+    userPassword: ${DEMO_USER_PASSWORD:User1234}
+  security:
+    login:
+      maxAttempts: ${SECURITY_LOGIN_MAX_ATTEMPTS:5}
+      windowSeconds: ${SECURITY_LOGIN_WINDOW:900}
+      lockDurationSeconds: ${SECURITY_LOGIN_LOCK_DURATION:300}
+    register:
+      maxPerWindow: ${SECURITY_REGISTER_MAX:3}
+      windowSeconds: ${SECURITY_REGISTER_WINDOW:3600}
+
+endpoints:
+  health:
+    enabled: true
+    sensitive: false
+  info:
+    enabled: true
+    sensitive: false

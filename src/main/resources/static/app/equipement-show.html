@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Equipement - Gestion Equipements</title>
+    <link rel="stylesheet" href="/css/tailwind.css"/>
+</head>
+<body data-admin="0" data-active="/app/equip" class="bg-gray-50 font-sans antialiased">
+    <div id="layout-root" class="flex h-screen overflow-hidden" style="display:none">
+        <div id="app-nav"></div>
+        <main class="flex-1 overflow-y-auto">
+            <div class="px-6 pt-5"><div id="flash-container"></div></div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <a href="/app/equipements.html" class="text-sm text-gray-500 hover:text-gray-700">&larr; Retour a mes equipements</a>
+                </div>
+                <h1 id="title" class="text-xl font-bold text-gray-900 mb-6">Equipement</h1>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white border border-gray-200 p-4">
+                        <h2 class="text-sm font-semibold text-gray-700 mb-3">Informations</h2>
+                        <dl id="info" class="text-sm"></dl>
+                        <a id="signaler-btn" href="#" class="inline-block mt-3 px-4 py-2 bg-red-600 text-white text-sm font-semibold hover:bg-red-700 rounded-none">Signaler un probleme</a>
+                    </div>
+                </div>
+
+                <h2 class="text-lg font-bold text-gray-900 mb-4">Signalements</h2>
+                <div class="bg-white border border-gray-200 overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-100 text-left">
+                                <th class="px-4 py-3 font-semibold text-gray-700">Date</th>
+                                <th class="px-4 py-3 font-semibold text-gray-700">Type</th>
+                                <th class="px-4 py-3 font-semibold text-gray-700">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody id="signalements"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="/js/api.js"></script>
+    <script src="/js/layout.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/pages/app-equipement-show.js"></script>
+</body>
+</html>

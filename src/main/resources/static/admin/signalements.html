@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Signalements - Gestion Equipements</title>
+    <link rel="stylesheet" href="/css/tailwind.css"/>
+</head>
+<body data-admin="1" data-active="/admin/sign" class="bg-gray-50 font-sans antialiased">
+    <div id="layout-root" class="flex h-screen overflow-hidden" style="display:none">
+        <div id="app-nav"></div>
+        <main class="flex-1 overflow-y-auto">
+            <div class="px-6 pt-5"><div id="flash-container"></div></div>
+            <div class="p-6">
+                <h1 class="text-xl font-bold text-gray-900 mb-4">Signalements</h1>
+                <div class="bg-white border border-gray-200 px-2 py-1.5 mb-4">
+                    <form id="search-form" class="flex items-center gap-1.5">
+                        <input type="text" id="q" value="" placeholder="Description ou N° serie..." class="flex-1 px-2 py-1.5 border border-gray-300 text-xs focus:outline-none focus:border-gray-600"/>
+                        <button type="submit" class="px-3 py-1.5 bg-gray-800 text-white text-xs font-semibold hover:bg-gray-700 transition-colors">Chercher</button>
+                        <a id="clear-filters" href="/admin/signalements.html" class="hidden px-3 py-1.5 text-xs text-gray-600 border border-gray-300 hover:border-gray-400 transition-colors">Effacer</a>
+                    </form>
+                </div>
+                <div class="bg-white border border-gray-200 overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-100 text-left">
+                                <th class="px-4 py-3 font-semibold text-gray-700">Equipement</th>
+                                <th class="px-4 py-3 font-semibold text-gray-700">Signale par</th>
+                                <th class="px-4 py-3 font-semibold text-gray-700">Type</th>
+                                <th class="px-4 py-3 font-semibold text-gray-700">Description</th>
+                                <th class="px-4 py-3 font-semibold text-gray-700">Date</th>
+                                <th class="px-4 py-3 font-semibold text-gray-700">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rows"></tbody>
+                    </table>
+                </div>
+                <div id="pagination"></div>
+            </div>
+        </main>
+    </div>
+    <script src="/js/api.js"></script>
+    <script src="/js/layout.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/pages/admin-signalements.js"></script>
+</body>
+</html>

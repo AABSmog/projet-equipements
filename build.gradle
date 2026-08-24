@@ -1,0 +1,60 @@
+plugins {
+    id 'groovy'
+    id 'io.micronaut.application' version '5.0.2'
+}
+
+version = '1.0.0'
+group = 'proj.equipment'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    annotationProcessor platform("io.micronaut.platform:micronaut-platform:$micronautVersion")
+    annotationProcessor 'io.micronaut.validation:micronaut-validation-processor'
+    implementation platform("io.micronaut.platform:micronaut-platform:$micronautVersion")
+    implementation 'io.micronaut:micronaut-http-server-netty'
+    implementation 'io.micronaut:micronaut-jackson-databind'
+    implementation 'io.micronaut.validation:micronaut-validation'
+    implementation 'io.micronaut:micronaut-inject-groovy'
+    implementation 'io.micronaut.reactor:micronaut-reactor'
+    implementation 'org.apache.groovy:groovy'
+    implementation 'io.micronaut.data:micronaut-data-hibernate-jpa'
+    implementation 'io.micronaut.sql:micronaut-jdbc-hikari'
+    implementation 'org.mindrot:jbcrypt:0.4'
+    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'org.yaml:snakeyaml'
+    runtimeOnly 'ch.qos.logback:logback-classic'
+
+    testImplementation platform("io.micronaut.platform:micronaut-platform:$micronautVersion")
+    testImplementation 'io.micronaut.test:micronaut-test-spock'
+    testImplementation 'org.spockframework:spock-core'
+}
+
+micronaut {
+    runtime 'netty'
+    testRuntime 'spock'
+    processing {
+        incremental(true)
+        annotations 'proj.equipment.*'
+    }
+}
+
+application {
+    mainClass = 'proj.equipment.Application'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(26)
+    }
+}
+
+compileGroovy {
+    groovyOptions.optimizationOptions.indy = false
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Detail equipement - Gestion Equipements</title>
+    <link rel="stylesheet" href="/css/tailwind.css"/>
+</head>
+<body data-admin="1" data-active="/admin/equip" class="bg-gray-50 font-sans antialiased">
+    <div id="layout-root" class="flex h-screen overflow-hidden" style="display:none">
+        <div id="app-nav"></div>
+        <main class="flex-1 overflow-y-auto">
+            <div class="px-6 pt-5"><div id="flash-container"></div></div>
+            <div class="p-6">
+                <a href="/admin/equipements.html" class="text-sm text-gray-600 hover:text-gray-900">&larr; Retour aux equipements</a>
+                <div class="flex items-center justify-between mt-2 mb-6">
+                    <h1 id="title" class="text-xl font-bold text-gray-900">Equipement</h1>
+                    <div id="actions" class="flex gap-2"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white border border-gray-200 p-5">
+                        <h2 class="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Informations</h2>
+                        <dl id="info" class="text-sm space-y-2"></dl>
+                    </div>
+                    <div class="bg-white border border-gray-200 p-5">
+                        <h2 class="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Affectation en cours</h2>
+                        <dl id="affectation" class="text-sm space-y-2"></dl>
+                    </div>
+                </div>
+                <div class="bg-white border border-gray-200 p-5 mt-4">
+                    <h2 class="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Signalements</h2>
+                    <div id="signalements" class="text-sm"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="/js/api.js"></script>
+    <script src="/js/layout.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/pages/admin-equipement-show.js"></script>
+</body>
+</html>
