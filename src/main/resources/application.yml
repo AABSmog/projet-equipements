@@ -29,7 +29,8 @@ datasources:
     url: ${EQUIPMENTS_DB_URL:`jdbc:postgresql://127.0.0.1:5432/Equipments`}
     driverClassName: org.postgresql.Driver
     username: ${EQUIPMENTS_DB_USER:postgres}
-    password: ${EQUIPMENTS_DB_PASSWORD}
+    # Dev par défaut = Smogolem10! (surchargeable via EQUIPMENTS_DB_PASSWORD en prod)
+    password: ${EQUIPMENTS_DB_PASSWORD:Smogolem10!}
     maxPoolSize: ${EQUIPMENTS_DB_POOL_MAX:10}
     minIdle: ${EQUIPMENTS_DB_POOL_MIN:2}
     dialect: POSTGRES
