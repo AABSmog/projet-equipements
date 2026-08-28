@@ -36,6 +36,10 @@ class CsrfFilter implements HttpServerFilter {
         if (!MUTATIONS.contains(request.method)) {
             return chain.proceed(request)
         }
+        // Wizard public de creation d'etablissement accessible sans session/CSRF
+        if (request.path == '/api/etablissements/wizard') {
+            return chain.proceed(request)
+        }
         Optional<Map<String, Object>> optSession = sessionManager.get(request)
         if (!optSession.present) {
             return Mono.just(HttpResponse.status(HttpStatus.BAD_REQUEST, 'Requete rejetee : jeton de securite invalide.')

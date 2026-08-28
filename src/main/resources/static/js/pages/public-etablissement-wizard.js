@@ -205,3 +205,9 @@ window.PAGE_INIT = function () {
 
   showStep(1);
 };
+// Auto-init pour la page publique sans app.js
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => { if (window.PAGE_INIT && !window._wizardDone) { window._wizardDone = true; window.PAGE_INIT(); } });
+} else {
+  if (!window._wizardDone) { window._wizardDone = true; window.PAGE_INIT(); }
+}
