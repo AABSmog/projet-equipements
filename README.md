@@ -134,11 +134,13 @@ Source PlantUML : `plantuml/class-diagram.wsd` (PNG dans même dossier).
 
 **Affectation** : attribuer exige DISPONIBLE → crée `Affectation(attribuePar, dateAffectation)` + eq→AFFECTE ; déjà affecté → refus ; restitution pose `dateRetour`+`raisonRetour` → eq→DISPONIBLE ; double restitution → refus ; `dateRetour>=dateAffectation` ; déclassement clôture affectation active + `infoEquipement="...declasse"` + eq→HORS_SERVICE.
 
-**Personnel** : email unique/validé, mdp 8car + minuscule/majuscule/chiffre, BCrypt via `@PrePersist/@PreUpdate`, `role` ADMIN/USER ; suppression bloquée si historique, auto-suppression interdite.
+**Personnel** : email unique/validé, mdp 8car + minuscule/majuscule/chiffre (surchargeable par établissement), BCrypt via `@PrePersist/@PreUpdate`, `role` ADMIN/USER ; suppression bloquée si historique, auto-suppression interdite.
 
 **Signalement** : description+type obligatoires ; seul équipement affecté à l'utilisateur courant.
 
 **Types** : nom unique insensible casse, création via équipement uniquement.
+
+**Multi-établissements** (v3) : chaque `Etablissement` (`id, nom, slug, domaineEmail, dbUrl`) isole ses `Personnel`/`Equipement` via `etablissement_id` (single-DB) et prépare le routage vers `equipments_<slug>` (multi-DB physique via `TenantDataSourceFactory`). Les `RegleGestion` (`email.pattern`, `password.*`, `affectation.dureeMaxJours`) sont par établissement et éditables dans `/admin/regles.html` (preview live `{prenom}.{nom}@domaine`). Le wizard `/admin/etablissement-wizard.html` guide en 4 étapes (Infos → Admins → Employés → Règles & récap) avec validation inline et `POST /api/admin/etablissements/wizard` transactionnel.
 
 ## Jeu de données de démonstration
 Créé par `BootstrapSeed.groovy` **si** `app.demo.seed=true` **et** `type_equipement` vide :
