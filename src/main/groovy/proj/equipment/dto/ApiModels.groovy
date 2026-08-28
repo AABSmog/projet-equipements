@@ -9,12 +9,13 @@ class ApiModels {
     static Map<String, Object> user(Personnel p) {
         if (!p) return null
         [
-                id      : p.id,
-                email   : p.email,
-                nom     : p.nom,
-                prenom  : p.prenom,
-                role    : p.role?.name(),
-                roleLabel: p.role?.label
+                id          : p.id,
+                email       : p.email,
+                nom         : p.nom,
+                prenom      : p.prenom,
+                role        : p.role?.name(),
+                roleLabel   : p.role?.label,
+                etablissement: p.etablissement ? [id: p.etablissement.id, nom: p.etablissement.nom, slug: p.etablissement.slug] : null
         ]
     }
 

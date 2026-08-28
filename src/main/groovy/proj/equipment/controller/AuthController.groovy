@@ -18,6 +18,7 @@ class AuthController {
     @Inject AuditService auditService
     @Inject AccountService accountService
     @Inject SessionManager sessionManager
+    @Inject EtablissementService etablissementService
 
     @Get('/session')
     HttpResponse<Map<String, Object>> session(HttpRequest<?> request) {
@@ -45,7 +46,13 @@ class AuthController {
             return erreur(HttpStatus.BAD_REQUEST, 'Trop de tentatives echouees. Compte temporairement verrouille, reessayez plus tard.')
         }
 
-        Personnel user = authService.authenticate(email, password)
+        Long etablissementId = body.etablissementId?.toString()?.isLong() ? body.etablissementId.toString().toLong() : null
+        String slug = body.etablissementSlug as String
+        if (!etablissementId && slug) {
+            def etab = etablissementService.findBySlug(slug)
+            if (etab) etablissementId = etab.id
+        }
+        Personnel user = etablissementId ? authService.authenticate(email, password, etablissementId) : authService.authenticate(email, password)
         if (user) {
             loginAttemptService.registerSuccess(emailKey)
             loginAttemptService.registerSuccess(ipKey)
