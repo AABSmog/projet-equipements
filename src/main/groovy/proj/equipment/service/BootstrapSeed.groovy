@@ -59,9 +59,15 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
                     .setParameter('tid', typeAutre.id).resultList as List<Equipement>
             if (autreEquipements) {
                 TypeEquipement fallback = findByNomIlike('Ordinateur')
+                if (!fallback) {
+                    fallback = new TypeEquipement(nom: 'Ordinateur')
+                    em.persist(fallback)
+                    em.flush()
+                }
                 autreEquipements.each { it.type = fallback; em.merge(it) }
             }
             em.remove(typeAutre)
+            em.flush()
         }
     }
 
@@ -83,16 +89,12 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
         Equipement eq2 = save(new Equipement(type: ordinateur, numeroSerie: 'SN-001', description: 'Station fixe HP EliteDesk 800'))
         save(new Equipement(type: ordinateur, numeroSerie: 'SN-002', description: 'PC portable Dell Latitude 5420', etat: EtatEquipement.DISPONIBLE))
         save(new Equipement(type: projecteur, numeroSerie: 'SN-003', description: 'Projecteur Epson EB-2155W', etat: EtatEquipement.DISPONIBLE))
-        Equipement eq4 = save(new Equipement(type: projecteur, numeroSerie: 'SN-004', description: 'Projecteur BenQ MH535'))
-        eq4.etat = EtatEquipement.EN_PANNE
-        em.merge(eq4)
+        Equipement eq4 = save(new Equipement(type: projecteur, numeroSerie: 'SN-004', description: 'Projecteur BenQ MH535', etat: EtatEquipement.EN_PANNE))
         save(new Equipement(type: imprimante, numeroSerie: 'SN-005', description: 'Imprimante laser Brother HL-L2370DW', etat: EtatEquipement.DISPONIBLE))
         save(new Equipement(type: tablette, numeroSerie: 'SN-006', description: 'iPad Air 11 (M2)', etat: EtatEquipement.DISPONIBLE))
         Equipement eq7 = save(new Equipement(type: tablette, numeroSerie: 'SN-007', description: 'Samsung Galaxy Tab S9'))
         save(new Equipement(type: telephone, numeroSerie: 'SN-008', description: 'iPhone 15 Pro', etat: EtatEquipement.DISPONIBLE))
-        Equipement eq9 = save(new Equipement(type: telephone, numeroSerie: 'SN-009', description: 'Samsung Galaxy S24'))
-        eq9.etat = EtatEquipement.REPARE
-        em.merge(eq9)
+        Equipement eq9 = save(new Equipement(type: telephone, numeroSerie: 'SN-009', description: 'Samsung Galaxy S24', etat: EtatEquipement.REPARE))
 
         Map<String, Object> attribution1 = affectationService.attribuer(eq2, alice, admin1)
         if (!attribution1.success) throw new RuntimeException("Seed : ${attribution1.message}")

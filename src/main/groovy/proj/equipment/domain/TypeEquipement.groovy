@@ -3,7 +3,7 @@ package proj.equipment.domain
 import jakarta.persistence.*
 
 @Entity
-@Table(name = 'type_equipement')
+@Table(name = 'type_equipement', uniqueConstraints = @UniqueConstraint(columnNames = ['nom']))
 class TypeEquipement {
 
     @Id

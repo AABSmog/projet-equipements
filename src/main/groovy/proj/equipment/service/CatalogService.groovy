@@ -16,7 +16,7 @@ class CatalogService {
     @PersistenceContext
     EntityManager em
 
-    @Transactional
+    @Transactional(readOnly = true)
     Map<String, Object> listeEquipements(String q, String etat, int max, int offset) {
         Map<String, Object> params = [:]
         StringBuilder where = new StringBuilder()
@@ -68,7 +68,7 @@ class CatalogService {
         ]
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     Map<String, Object> listeAffectations(String q, Long typeId, int max, int offset) {
         Map<String, Object> params = [:]
         StringBuilder where = new StringBuilder()
@@ -101,7 +101,7 @@ class CatalogService {
         ]
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     Map<String, Object> listePersonnels(String q, int max, int offset) {
         Map<String, Object> params = [:]
         StringBuilder where = new StringBuilder()
@@ -133,7 +133,7 @@ class CatalogService {
         ]
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     Map<String, Object> listeSignalements(String q, int max, int offset) {
         Map<String, Object> params = [:]
         StringBuilder where = new StringBuilder()
@@ -157,7 +157,7 @@ class CatalogService {
         ]
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     Map<String, Object> listeAudit(String q, int max, int offset) {
         Map<String, Object> params = [:]
         StringBuilder where = new StringBuilder()
@@ -180,13 +180,13 @@ class CatalogService {
         ]
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     List<Map<String, Object>> listeTypes() {
         List<TypeEquipement> types = em.createQuery('from TypeEquipement order by nom asc', TypeEquipement).resultList as List<TypeEquipement>
         types.collect { t -> ApiModels.typeEquipement(t) }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     Map<String, Object> listeTypesPaginee(String q, int max, int offset) {
         Map<String, Object> params = [:]
         String cond = ''
@@ -207,7 +207,7 @@ class CatalogService {
         ]
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     Map<String, Object> statsAdministration() {
         [
                 totalEquipements    : singleLong('select count(e) from Equipement e', [:]),
@@ -217,7 +217,7 @@ class CatalogService {
         ]
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     List<Map<String, Object>> rechercherEquipementsDisponibles(String q, Long typeId) {
         Map<String, Object> params = [:]
         StringBuilder where = new StringBuilder(' e.etat = :etat ')
@@ -239,7 +239,7 @@ class CatalogService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     List<Map<String, Object>> rechercherPersonnel(String q) {
         Map<String, Object> params = [:]
         StringBuilder where = new StringBuilder()
@@ -253,7 +253,7 @@ class CatalogService {
         items.collect { p -> [id: p.id, label: p.prenom + ' ' + p.nom] as Map<String, Object> }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     Map<String, Object> mesEquipements(Personnel user, int max, int offset) {
         List<Affectation> actives = em.createQuery(
                 'select a from Affectation a left join fetch a.equipement e left join fetch a.equipement.type where a.personnel.id = :uid and a.dateRetour is null order by a.dateAffectation desc', Affectation)
@@ -270,7 +270,7 @@ class CatalogService {
         ]
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     Map<String, Object> mesSignalements(Personnel user, int max, int offset) {
         List<Signalement> items = em.createQuery(
                 'select s from Signalement s left join fetch s.equipement e where s.personnel.id = :uid order by s.dateCreated desc', Signalement)
@@ -287,7 +287,7 @@ class CatalogService {
         ]
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     List<Map<String, Object>> signalementsEquipement(Equipement equipement) {
         List<Signalement> items = em.createQuery(
                 'select s from Signalement s left join fetch s.personnel p where s.equipement.id = :eid order by s.dateCreated desc', Signalement)

@@ -4,7 +4,7 @@ import jakarta.persistence.*
 import org.mindrot.jbcrypt.BCrypt
 
 @Entity
-@Table(name = 'equipement')
+@Table(name = 'equipement', uniqueConstraints = @UniqueConstraint(columnNames = ['numero_serie']))
 class Equipement {
 
     @Id

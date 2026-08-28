@@ -89,7 +89,10 @@ class AdminEquipementController {
 
         e.type = type
         e.description = body.description as String
-        e.numeroSerie = body.numeroSerie as String
+        String nouveauSn = body.numeroSerie as String
+        if (nouveauSn && nouveauSn != e.numeroSerie) {
+            return HttpUtil.erreur(HttpStatus.BAD_REQUEST, 'Numero de serie non modifiable')
+        }
         String etat = body.etat as String
         if (etat) {
             try {
@@ -138,6 +141,9 @@ class AdminEquipementController {
         Personnel operateur = currentUser(request)
         Equipement e = lookup.equipementById(id)
         if (!e) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Equipement introuvable')
+        if (e.etat == EtatEquipement.AFFECTE) {
+            return HttpUtil.erreur(HttpStatus.BAD_REQUEST, 'Impossible de supprimer un equipement affecte : desaffectez-le d\'abord')
+        }
 
         String info = "${e.type?.nom} - ${e.numeroSerie} (supprime)"
         List<Affectation> affs = em.createQuery('from Affectation where equipement.id = :id', Affectation)

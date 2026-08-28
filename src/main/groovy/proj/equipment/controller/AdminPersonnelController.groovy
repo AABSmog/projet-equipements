@@ -83,11 +83,20 @@ class AdminPersonnelController {
         if (operateur && id == operateur.id) {
             return HttpUtil.erreur(HttpStatus.BAD_REQUEST, 'Impossible de supprimer votre propre compte')
         }
+        if (p.role == RolePersonnel.ADMIN) {
+            long nbAdmins = em.createQuery('select count(x) from Personnel x where x.role = :r', Long)
+                    .setParameter('r', RolePersonnel.ADMIN).singleResult
+            if (nbAdmins <= 1) {
+                return HttpUtil.erreur(HttpStatus.BAD_REQUEST, 'Impossible de supprimer le dernier administrateur')
+            }
+        }
         long nbAffectations = em.createQuery('select count(a) from Affectation a where a.personnel.id = :id', Long)
                 .setParameter('id', id).singleResult
         long nbSignalements = em.createQuery('select count(s) from Signalement s where s.personnel.id = :id', Long)
                 .setParameter('id', id).singleResult
-        if (nbAffectations > 0 || nbSignalements > 0) {
+        long nbAttribuePar = em.createQuery('select count(a) from Affectation a where a.attribuePar.id = :id', Long)
+                .setParameter('id', id).singleResult
+        if (nbAffectations > 0 || nbSignalements > 0 || nbAttribuePar > 0) {
             return HttpUtil.erreur(HttpStatus.BAD_REQUEST, "Suppression impossible : historique d'affectations ou de signalements existant")
         }
         em.remove(p)

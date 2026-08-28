@@ -47,10 +47,13 @@ const Api = (() => {
     const startedAt = ApiLog.begin(method, url, body);
     const headers = { 'Accept': 'application/json', 'X-CSRF-Token': csrfToken || '' };
     if (body) headers['Content-Type'] = 'application/json';
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     try {
-      const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+      const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined, signal: controller.signal });
       let data = null;
       try { data = await res.json(); } catch (e) { /* reponse sans corps JSON */ }
+      clearTimeout(timeoutId);
       ApiLog.end(startedAt, res.status);
       if (!res.ok) {
         const err = new Error((data && data.error) || ('Erreur ' + res.status));
@@ -67,6 +70,13 @@ const Api = (() => {
       }
       return data;
     } catch (err) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        const abortErr = new Error('Delai d\'attente depasse (8s) — verifiez votre connexion');
+        abortErr.status = 408;
+        ApiLog.fail(startedAt, method, url, abortErr);
+        throw abortErr;
+      }
       if (!(err instanceof Error) || err.status === undefined) {
         ApiLog.fail(startedAt, method, url, err);
       }
