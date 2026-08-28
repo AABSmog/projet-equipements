@@ -67,19 +67,33 @@ window.PAGE_INIT = function () {
     e.preventDefault();
     const id = form.dataset.id;
     const act = form.dataset.act;
-    if (act === 'desaffecter') {
-      if (!confirm('Desaffecter cet equipement ?')) return;
-      await Api.post(`/api/admin/equipements/${id}/desaffecter`);
-      Flash.set('Equipement desaffecte', 'success');
-    } else if (act === 'declasser') {
-      if (!confirm('Declasser cet equipement ?')) return;
-      await Api.post(`/api/admin/equipements/${id}/declasser`);
-      Flash.set('Equipement declasse hors service', 'success');
+    try {
+      if (act === 'desaffecter') {
+        if (!confirm('Desaffecter cet equipement ?')) return;
+        await Api.post(`/api/admin/equipements/${id}/desaffecter`);
+        Flash.set('Equipement desaffecte', 'success');
+      } else if (act === 'declasser') {
+        if (!confirm('Declasser cet equipement ?')) return;
+        await Api.post(`/api/admin/equipements/${id}/declasser`);
+        Flash.set('Equipement declasse hors service', 'success');
+      }
+      window.location.reload();
+    } catch (err) {
+      const msg = 'Erreur lors de l\'operation : ' + (err.message || 'Erreur inconnue');
+      const flash = document.getElementById('flash-container');
+      if (flash && typeof mountAlert === 'function') {
+        mountAlert(flash, msg, 'error');
+        flash.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        alert(msg);
+      }
     }
-    window.location.reload();
   });
 
   load().catch((err) => {
-    document.getElementById('rows').innerHTML = emptyRow(6, err.message);
+    const msg = 'Erreur lors du chargement des equipements : ' + (err.message || 'Erreur inconnue');
+    const flash = document.getElementById('flash-container');
+    if (flash && typeof mountAlert === 'function') mountAlert(flash, msg, 'error');
+    document.getElementById('rows').innerHTML = emptyRow(6, msg);
   });
 };

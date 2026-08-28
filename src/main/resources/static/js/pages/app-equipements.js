@@ -45,11 +45,21 @@ window.PAGE_INIT = function () {
       Flash.set('Retour enregistre', 'success');
       window.location.reload();
     } catch (err) {
-      alert(err.message);
+      const msg = 'Erreur lors du retour : ' + (err.message || 'Erreur inconnue');
+      const flash = document.getElementById('flash-container');
+      if (flash && typeof mountAlert === 'function') {
+        mountAlert(flash, msg, 'error');
+        flash.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        alert(msg);
+      }
     }
   });
 
   load().catch((err) => {
-    document.getElementById('rows').innerHTML = emptyRow(6, err.message);
+    const msg = 'Erreur lors du chargement de vos equipements : ' + (err.message || 'Erreur inconnue');
+    const flash = document.getElementById('flash-container');
+    if (flash && typeof mountAlert === 'function') mountAlert(flash, msg, 'error');
+    document.getElementById('rows').innerHTML = emptyRow(6, msg);
   });
 };

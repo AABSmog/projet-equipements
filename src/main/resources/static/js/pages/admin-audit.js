@@ -47,6 +47,9 @@ window.PAGE_INIT = function () {
   });
 
   load().catch((err) => {
-    document.getElementById('rows').innerHTML = emptyRow(5, err.message);
+    const msg = 'Erreur lors du chargement du journal : ' + (err.message || 'Erreur inconnue');
+    const flash = document.getElementById('flash-container');
+    if (flash && typeof mountAlert === 'function') mountAlert(flash, msg, 'error');
+    document.getElementById('rows').innerHTML = emptyRow(5, msg);
   });
 };

@@ -87,13 +87,23 @@ window.PAGE_INIT = function () {
       Flash.set('Retour enregistre', 'success');
       window.location.reload();
     } catch (err) {
-      alert(err.message);
+      const msg = 'Erreur lors du retour : ' + (err.message || 'Erreur inconnue');
+      const flash = document.getElementById('flash-container');
+      if (flash && typeof mountAlert === 'function') {
+        mountAlert(flash, msg, 'error');
+        flash.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        alert(msg);
+      }
       delete form.dataset.submitting;
       if (button) button.disabled = false;
     }
   });
 
   load().catch((err) => {
-    document.getElementById('rows').innerHTML = emptyRow(9, err.message);
+    const msg = 'Erreur lors du chargement de l\'historique : ' + (err.message || 'Erreur inconnue');
+    const flash = document.getElementById('flash-container');
+    if (flash && typeof mountAlert === 'function') mountAlert(flash, msg, 'error');
+    document.getElementById('rows').innerHTML = emptyRow(9, msg);
   });
 };

@@ -55,12 +55,26 @@ window.PAGE_INIT = function () {
     const btn = e.target.closest('[data-act="delete"]');
     if (!btn) return;
     if (!confirm('Supprimer ce signalement ?')) return;
-    await Api.del(`/api/admin/signalements/${btn.dataset.id}`);
-    Flash.set('Signalement supprime', 'success');
-    window.location.reload();
+    try {
+      await Api.del(`/api/admin/signalements/${btn.dataset.id}`);
+      Flash.set('Signalement supprime', 'success');
+      window.location.reload();
+    } catch (err) {
+      const msg = 'Erreur lors de la suppression : ' + (err.message || 'Erreur inconnue');
+      const flash = document.getElementById('flash-container');
+      if (flash && typeof mountAlert === 'function') {
+        mountAlert(flash, msg, 'error');
+        flash.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        alert(msg);
+      }
+    }
   });
 
   load().catch((err) => {
-    document.getElementById('rows').innerHTML = emptyRow(6, err.message);
+    const msg = 'Erreur lors du chargement des signalements : ' + (err.message || 'Erreur inconnue');
+    const flash = document.getElementById('flash-container');
+    if (flash && typeof mountAlert === 'function') mountAlert(flash, msg, 'error');
+    document.getElementById('rows').innerHTML = emptyRow(6, msg);
   });
 };

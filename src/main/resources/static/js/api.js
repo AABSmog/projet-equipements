@@ -56,7 +56,12 @@ const Api = (() => {
       clearTimeout(timeoutId);
       ApiLog.end(startedAt, res.status);
       if (!res.ok) {
-        const err = new Error((data && data.error) || ('Erreur ' + res.status));
+        let defaultMsg = 'Erreur ' + res.status;
+        if (res.status === 401) defaultMsg = 'Authentification requise — reconnectez-vous';
+        else if (res.status === 403) defaultMsg = 'Acces refuse — droits insuffisants';
+        else if (res.status === 404) defaultMsg = 'Ressource introuvable';
+        else if (res.status >= 500) defaultMsg = 'Erreur interne du serveur — reessayez plus tard (' + res.status + ')';
+        const err = new Error((data && data.error) || defaultMsg);
         err.status = res.status;
         err.data = data;
         if (res.status === 401 && !url.startsWith('/api/auth/')) {
