@@ -37,7 +37,7 @@ datasources:
 
 hibernate:
   hbm2ddl:
-    auto: ${EQUIPMENTS_DB_DDL:validate}
+    auto: ${EQUIPMENTS_DB_DDL:update}
   show_sql: ${EQUIPMENTS_DB_LOG_SQL:false}
   format_sql: false
   cache:

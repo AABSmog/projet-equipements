@@ -32,6 +32,10 @@ class Personnel {
     @Column(name = 'role', nullable = false, length = 255)
     RolePersonnel role = RolePersonnel.USER
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = 'etablissement_id')
+    Etablissement etablissement
+
     @PrePersist
     @PreUpdate
     protected void hashPasswordSiNecessaire() {

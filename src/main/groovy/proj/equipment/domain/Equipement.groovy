@@ -29,6 +29,10 @@ class Equipement {
     @Column(name = 'etat', nullable = false, length = 255)
     EtatEquipement etat = EtatEquipement.DISPONIBLE
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = 'etablissement_id')
+    Etablissement etablissement
+
     @PrePersist
     protected void genererNumeroSerieSiAbsent() {
         if (!numeroSerie) {

@@ -32,10 +32,15 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
     @Value('${app.demo.seed:true}')
     boolean seedEnabled
 
+    @Inject RegleGestionService regleGestionService
+
     @Override
     @Transactional
     void onApplicationEvent(ApplicationStartupEvent event) {
         migrerTypeOrphelin()
+        Etablissement principal = ensureDefaultEtablissement()
+        // Migration des donnees existantes sans etablissement (single-DB mode)
+        migrerDonneesSansEtablissement(principal)
         if (!seedEnabled) {
             log.info('Jeu de donnees de demonstration desactive (app.demo.seed=false)')
             return
@@ -49,7 +54,34 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
             log.warn('Identifiants de demonstration absents (app.demo.adminPassword / app.demo.userPassword), seed ignore')
             return
         }
-        creerJeuDeDonnees()
+        creerJeuDeDonnees(principal)
+    }
+
+    private Etablissement ensureDefaultEtablissement() {
+        List<Etablissement> r = em.createQuery('from Etablissement where slug = :s', Etablissement)
+                .setParameter('s', 'principal').setMaxResults(1).resultList as List<Etablissement>
+        if (r) return r[0]
+        Etablissement e = new Etablissement(nom: 'Etablissement Principal', slug: 'principal', domaineEmail: 'example.com', statut: 'ACTIF')
+        em.persist(e)
+        em.flush()
+        // regles par defaut
+        RegleGestion.defaults(e.domaineEmail).each { k, v ->
+            em.persist(new RegleGestion(etablissement: e, cle: k, valeur: v))
+        }
+        log.info('Etablissement principal cree (id={})', e.id)
+        e
+    }
+
+    private void migrerDonneesSansEtablissement(Etablissement etab) {
+        try {
+            int p = em.createQuery('update Personnel p set p.etablissement = :etab where p.etablissement is null')
+                    .setParameter('etab', etab).executeUpdate()
+            int eq = em.createQuery('update Equipement e set e.etablissement = :etab where e.etablissement is null')
+                    .setParameter('etab', etab).executeUpdate()
+            if (p + eq > 0) log.info('Migration etablissement principal : {} personnels, {} equipements rattaches', p, eq)
+        } catch (Exception ex) {
+            log.warn('Migration etablissement ignoree: {}', ex.message)
+        }
     }
 
     private void migrerTypeOrphelin() {
@@ -71,30 +103,30 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
         }
     }
 
-    private void creerJeuDeDonnees() {
+    private void creerJeuDeDonnees(Etablissement etab) {
         TypeEquipement ordinateur = save(new TypeEquipement(nom: 'Ordinateur'))
         TypeEquipement projecteur = save(new TypeEquipement(nom: 'Projecteur'))
         TypeEquipement imprimante = save(new TypeEquipement(nom: 'Imprimante'))
         TypeEquipement tablette = save(new TypeEquipement(nom: 'Tablette'))
         TypeEquipement telephone = save(new TypeEquipement(nom: 'Telephone'))
 
-        Personnel admin1 = save(new Personnel(nom: 'Diop', prenom: 'Mamadou', email: 'mamadou.diop@example.com', motDePasse: demoAdminPassword, role: RolePersonnel.ADMIN))
-        save(new Personnel(nom: 'Ndiaye', prenom: 'Fatou', email: 'fatou.ndiaye@example.com', motDePasse: demoAdminPassword, role: RolePersonnel.ADMIN))
-        Personnel alice = save(new Personnel(nom: 'Diallo', prenom: 'Aissatou', email: 'aissatou.diallo@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER))
-        Personnel bob = save(new Personnel(nom: 'Fall', prenom: 'Abdoulaye', email: 'abdoulaye.fall@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER))
-        Personnel carole = save(new Personnel(nom: 'Sarr', prenom: 'Ndeye', email: 'ndeye.sarr@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER))
-        save(new Personnel(nom: 'Mbaye', prenom: 'Ousmane', email: 'ousmane.mbaye@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER))
-        save(new Personnel(nom: 'Ba', prenom: 'Marieme', email: 'marieme.ba@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER))
+        Personnel admin1 = save(new Personnel(nom: 'Diop', prenom: 'Mamadou', email: 'mamadou.diop@example.com', motDePasse: demoAdminPassword, role: RolePersonnel.ADMIN, etablissement: etab))
+        save(new Personnel(nom: 'Ndiaye', prenom: 'Fatou', email: 'fatou.ndiaye@example.com', motDePasse: demoAdminPassword, role: RolePersonnel.ADMIN, etablissement: etab))
+        Personnel alice = save(new Personnel(nom: 'Diallo', prenom: 'Aissatou', email: 'aissatou.diallo@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
+        Personnel bob = save(new Personnel(nom: 'Fall', prenom: 'Abdoulaye', email: 'abdoulaye.fall@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
+        Personnel carole = save(new Personnel(nom: 'Sarr', prenom: 'Ndeye', email: 'ndeye.sarr@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
+        save(new Personnel(nom: 'Mbaye', prenom: 'Ousmane', email: 'ousmane.mbaye@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
+        save(new Personnel(nom: 'Ba', prenom: 'Marieme', email: 'marieme.ba@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
 
-        Equipement eq2 = save(new Equipement(type: ordinateur, numeroSerie: 'SN-001', description: 'Station fixe HP EliteDesk 800'))
-        save(new Equipement(type: ordinateur, numeroSerie: 'SN-002', description: 'PC portable Dell Latitude 5420', etat: EtatEquipement.DISPONIBLE))
-        save(new Equipement(type: projecteur, numeroSerie: 'SN-003', description: 'Projecteur Epson EB-2155W', etat: EtatEquipement.DISPONIBLE))
-        Equipement eq4 = save(new Equipement(type: projecteur, numeroSerie: 'SN-004', description: 'Projecteur BenQ MH535', etat: EtatEquipement.EN_PANNE))
-        save(new Equipement(type: imprimante, numeroSerie: 'SN-005', description: 'Imprimante laser Brother HL-L2370DW', etat: EtatEquipement.DISPONIBLE))
-        save(new Equipement(type: tablette, numeroSerie: 'SN-006', description: 'iPad Air 11 (M2)', etat: EtatEquipement.DISPONIBLE))
-        Equipement eq7 = save(new Equipement(type: tablette, numeroSerie: 'SN-007', description: 'Samsung Galaxy Tab S9'))
-        save(new Equipement(type: telephone, numeroSerie: 'SN-008', description: 'iPhone 15 Pro', etat: EtatEquipement.DISPONIBLE))
-        Equipement eq9 = save(new Equipement(type: telephone, numeroSerie: 'SN-009', description: 'Samsung Galaxy S24', etat: EtatEquipement.REPARE))
+        Equipement eq2 = save(new Equipement(type: ordinateur, numeroSerie: 'SN-001', description: 'Station fixe HP EliteDesk 800', etablissement: etab))
+        save(new Equipement(type: ordinateur, numeroSerie: 'SN-002', description: 'PC portable Dell Latitude 5420', etablissement: etab, etat: EtatEquipement.DISPONIBLE))
+        save(new Equipement(type: projecteur, numeroSerie: 'SN-003', description: 'Projecteur Epson EB-2155W', etablissement: etab, etat: EtatEquipement.DISPONIBLE))
+        Equipement eq4 = save(new Equipement(type: projecteur, numeroSerie: 'SN-004', description: 'Projecteur BenQ MH535', etablissement: etab, etat: EtatEquipement.EN_PANNE))
+        save(new Equipement(type: imprimante, numeroSerie: 'SN-005', description: 'Imprimante laser Brother HL-L2370DW', etablissement: etab, etat: EtatEquipement.DISPONIBLE))
+        save(new Equipement(type: tablette, numeroSerie: 'SN-006', description: 'iPad Air 11 (M2)', etat: EtatEquipement.DISPONIBLE, etablissement: etab))
+        Equipement eq7 = save(new Equipement(type: tablette, numeroSerie: 'SN-007', description: 'Samsung Galaxy Tab S9', etablissement: etab))
+        save(new Equipement(type: telephone, numeroSerie: 'SN-008', description: 'iPhone 15 Pro', etablissement: etab, etat: EtatEquipement.DISPONIBLE))
+        Equipement eq9 = save(new Equipement(type: telephone, numeroSerie: 'SN-009', description: 'Samsung Galaxy S24', etablissement: etab, etat: EtatEquipement.REPARE))
 
         Map<String, Object> attribution1 = affectationService.attribuer(eq2, alice, admin1)
         if (!attribution1.success) throw new RuntimeException("Seed : ${attribution1.message}")

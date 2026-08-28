@@ -12,12 +12,14 @@ function renderNavigation(user, active) {
     nav += `
       <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Administration</div>
       ${li('/admin/index.html', 'Dashboard', '/admin/ind')}
+      ${li('/admin/etablissement-wizard.html', 'Etablissements', '/admin/etab')}
       <div class="mt-4 px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Gestion</div>
       ${li('/admin/equipements.html', 'Equipements', '/admin/equip')}
       ${li('/admin/affectations.html', 'Affectations', '/admin/affect')}
       ${li('/admin/affectation-historique.html', 'Historique des attributions', '/admin/hist')}
       ${li('/admin/signalements.html', 'Signalements', '/admin/sign')}
       ${li('/admin/personnels.html', 'Personnel', '/admin/pers')}
+      ${li('/admin/regles.html', 'Regles de gestion', '/admin/regles')}
       <div class="mt-4 px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Suivi</div>
       ${li('/admin/audit.html', 'Journal d\'audit', '/admin/aud')}`;
   } else {
