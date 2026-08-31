@@ -192,7 +192,7 @@ window.PAGE_INIT = function () {
         etablissement: { nom: etabNom.value.trim(), slug: etabSlug.value.trim(), domaineEmail: etabDomaine.value.trim() },
         admins, employes, regles
       });
-      Flash.set(res.message || 'Etablissement cree — connectez-vous', 'success');
+      Flash.set('Etablissement cree — connectez-vous', 'success');
       const slug = res.etablissement ? res.etablissement.slug : etabSlug.value.trim();
       window.location = '/index.html?etablissement=' + encodeURIComponent(slug);
     } catch (err) {
