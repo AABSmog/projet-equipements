@@ -54,7 +54,7 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
             log.warn('Identifiants de demonstration absents (app.demo.adminPassword / app.demo.userPassword), seed ignore')
             return
         }
-        creerJeuDeDonnees(principal)
+        creerEtablissementsDeDemonstration(principal)
     }
 
     private Etablissement ensureDefaultEtablissement() {
@@ -103,48 +103,85 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
         }
     }
 
-    private void creerJeuDeDonnees(Etablissement etab) {
-        TypeEquipement ordinateur = save(new TypeEquipement(nom: 'Ordinateur'))
-        TypeEquipement projecteur = save(new TypeEquipement(nom: 'Projecteur'))
-        TypeEquipement imprimante = save(new TypeEquipement(nom: 'Imprimante'))
-        TypeEquipement tablette = save(new TypeEquipement(nom: 'Tablette'))
-        TypeEquipement telephone = save(new TypeEquipement(nom: 'Telephone'))
+    private void creerEtablissementsDeDemonstration(Etablissement principal) {
+        List<Map<String, Object>> etablissements = [
+            [nom: 'SOMDOP Consulting', slug: 'somdop', domaineEmail: 'somdop.com', admins: [
+                [nom: 'Diop', prenom: 'Mamadou', email: 'm.diop@somdop.com', role: RolePersonnel.ADMIN],
+                [nom: 'Ndiaye', prenom: 'Fatou', email: 'f.ndiaye@somdop.com', role: RolePersonnel.ADMIN]
+            ], users: [
+                [nom: 'Diallo', prenom: 'Aissatou', email: 'a.diallo@somdop.com'],
+                [nom: 'Fall', prenom: 'Abdoulaye', email: 'a.fall@somdop.com'],
+                [nom: 'Sarr', prenom: 'Ndeye', email: 'n.sarr@somdop.com'],
+                [nom: 'Traore', prenom: 'Issouf', email: 'i.traore@somdop.com']
+            ]],
+            [nom: 'Coulibaly Industries', slug: 'coulibaly-industries', domaineEmail: 'coulibaly-industries.com', admins: [
+                [nom: 'Coulibaly', prenom: 'Yacouba', email: 'y.coulibaly@coulibaly-industries.com', role: RolePersonnel.ADMIN],
+                [nom: 'Konate', prenom: 'Aminata', email: 'a.konate@coulibaly-industries.com', role: RolePersonnel.ADMIN]
+            ], users: [
+                [nom: 'Sangare', prenom: 'Fatoumata', email: 'f.sangare@coulibaly-industries.com'],
+                [nom: 'Ouattara', prenom: 'Koffi', email: 'k.ouattara@coulibaly-industries.com'],
+                [nom: 'Diao', prenom: 'Aida', email: 'a.diao@coulibaly-industries.com'],
+                [nom: 'Camara', prenom: 'Mohamed', email: 'm.camara@coulibaly-industries.com']
+            ]],
+            [nom: 'Sylla Tech Solutions', slug: 'sylla-tech', domaineEmail: 'sylla-tech.com', admins: [
+                [nom: 'Sylla', prenom: 'Hadja', email: 'h.sylla@sylla-tech.com', role: RolePersonnel.ADMIN],
+                [nom: 'Ba', prenom: 'Marieme', email: 'm.ba@sylla-tech.com', role: RolePersonnel.ADMIN]
+            ], users: [
+                [nom: 'Diop', prenom: 'Moussa', email: 'm.diop@sylla-tech.com'],
+                [nom: 'Ndiaye', prenom: 'Aminata', email: 'a.ndiaye@sylla-tech.com'],
+                [nom: 'Diallo', prenom: 'Lamine', email: 'l.diallo@sylla-tech.com'],
+                [nom: 'Fall', prenom: 'Mariam', email: 'm.fall@sylla-tech.com']
+            ]],
+            [nom: 'Ouattara Logistics', slug: 'ouattara-logistics', domaineEmail: 'ouattara-logistics.com', admins: [
+                [nom: 'Ouattara', prenom: 'Koffi', email: 'k.ouattara@ouattara-logistics.com', role: RolePersonnel.ADMIN],
+                [nom: 'Sangare', prenom: 'Lansana', email: 'l.sangare@ouattara-logistics.com', role: RolePersonnel.ADMIN]
+            ], users: [
+                [nom: 'Coulibaly', prenom: 'Adama', email: 'a.coulibaly@ouattara-logistics.com'],
+                [nom: 'Konate', prenom: 'Ramatoulaye', email: 'r.konate@ouattara-logistics.com'],
+                [nom: 'Diao', prenom: 'Aminata', email: 'a.diao@ouattara-logistics.com'],
+                [nom: 'Camara', prenom: 'Ibrahima', email: 'i.camara@ouattara-logistics.com']
+            ]]
+        ]
 
-        Personnel admin1 = save(new Personnel(nom: 'Diop', prenom: 'Mamadou', email: 'mamadou.diopesp@example.com', motDePasse: demoAdminPassword, role: RolePersonnel.ADMIN, etablissement: etab))
-        save(new Personnel(nom: 'Ndiaye', prenom: 'Fatou', email: 'fatou.ndiayeesp@example.com', motDePasse: demoAdminPassword, role: RolePersonnel.ADMIN, etablissement: etab))
-        Personnel alice = save(new Personnel(nom: 'Diallo', prenom: 'Aissatou', email: 'aissatou.dialloesp@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
-        Personnel bob = save(new Personnel(nom: 'Fall', prenom: 'Abdoulaye', email: 'abdoulaye.fallesp@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
-        Personnel carole = save(new Personnel(nom: 'Sarr', prenom: 'Ndeye', email: 'ndeye.sarresp@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
-        save(new Personnel(nom: 'Mbaye', prenom: 'Ousmane', email: 'ousmane.mbayeesp@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
-        save(new Personnel(nom: 'Ba', prenom: 'Marieme', email: 'marieme.baesp@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
-        save(new Personnel(nom: 'Traore', prenom: 'Issouf', email: 'issa.traoreesp@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
-        save(new Personnel(nom: 'Konate', prenom: 'Aminata', email: 'amina.konateesp@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
-        save(new Personnel(nom: 'Coulibaly', prenom: 'Yacouba', email: 'yacouba.coulibalyesp@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
-        save(new Personnel(nom: 'Sangare', prenom: 'Fatoumata', email: 'fatou.sangareesp@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
-        save(new Personnel(nom: 'Ouattara', prenom: 'Koffi', email: 'koffi.ouattaraesp@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
-        save(new Personnel(nom: 'Diao', prenom: 'Aida', email: 'aida.diaoesp@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
-        save(new Personnel(nom: 'Camara', prenom: 'Mohamed', email: 'mohamed.camaraesp@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
-        save(new Personnel(nom: 'Sylla', prenom: 'Hadja', email: 'hadja.syllaesp@example.com', motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
+        List<TypeEquipement> types = [
+            save(new TypeEquipement(nom: 'Ordinateur')),
+            save(new TypeEquipement(nom: 'Projecteur')),
+            save(new TypeEquipement(nom: 'Imprimante')),
+            save(new TypeEquipement(nom: 'Tablette')),
+            save(new TypeEquipement(nom: 'Telephone'))
+        ]
 
-        Equipement eq2 = save(new Equipement(type: ordinateur, numeroSerie: 'SN-001', description: 'Station fixe HP EliteDesk 800', etablissement: etab))
-        save(new Equipement(type: ordinateur, numeroSerie: 'SN-002', description: 'PC portable Dell Latitude 5420', etablissement: etab, etat: EtatEquipement.DISPONIBLE))
-        save(new Equipement(type: projecteur, numeroSerie: 'SN-003', description: 'Projecteur Epson EB-2155W', etablissement: etab, etat: EtatEquipement.DISPONIBLE))
-        Equipement eq4 = save(new Equipement(type: projecteur, numeroSerie: 'SN-004', description: 'Projecteur BenQ MH535', etablissement: etab, etat: EtatEquipement.EN_PANNE))
-        save(new Equipement(type: imprimante, numeroSerie: 'SN-005', description: 'Imprimante laser Brother HL-L2370DW', etablissement: etab, etat: EtatEquipement.DISPONIBLE))
-        save(new Equipement(type: tablette, numeroSerie: 'SN-006', description: 'iPad Air 11 (M2)', etat: EtatEquipement.DISPONIBLE, etablissement: etab))
-        Equipement eq7 = save(new Equipement(type: tablette, numeroSerie: 'SN-007', description: 'Samsung Galaxy Tab S9', etablissement: etab))
-        save(new Equipement(type: telephone, numeroSerie: 'SN-008', description: 'iPhone 15 Pro', etablissement: etab, etat: EtatEquipement.DISPONIBLE))
-        Equipement eq9 = save(new Equipement(type: telephone, numeroSerie: 'SN-009', description: 'Samsung Galaxy S24', etablissement: etab, etat: EtatEquipement.REPARE))
+        etablissements.each { Map edata ->
+            Etablissement etab = save(new Etablissement(nom: edata.nom, slug: edata.slug, domaineEmail: edata.domaineEmail, statut: 'ACTIF'))
+            edata.admins.each { Map a ->
+                save(new Personnel(nom: a.nom, prenom: a.prenom, email: a.email, motDePasse: demoAdminPassword, role: a.role, etablissement: etab))
+            }
+            edata.users.each { Map u ->
+                save(new Personnel(nom: u.nom, prenom: u.prenom, email: u.email, motDePasse: demoUserPassword, role: RolePersonnel.USER, etablissement: etab))
+            }
 
-        Map<String, Object> attribution1 = affectationService.attribuer(eq2, alice, admin1)
-        if (!attribution1.success) throw new RuntimeException("Seed : ${attribution1.message}")
-        Map<String, Object> attribution2 = affectationService.attribuer(eq7, bob, admin1)
-        if (!attribution2.success) throw new RuntimeException("Seed : ${attribution2.message}")
+            Equipement eq1 = save(new Equipement(type: types[0], numeroSerie: "${edata.slug}-SN001", description: "Station fixe ${edata.nom}", etablissement: etab))
+            Equipement eq2 = save(new Equipement(type: types[0], numeroSerie: "${edata.slug}-SN002", description: "PC portable ${edata.nom}", etat: EtatEquipement.DISPONIBLE, etablissement: etab))
+            save(new Equipement(type: types[1], numeroSerie: "${edata.slug}-SN003", description: "Projecteur ${edata.nom}", etat: EtatEquipement.DISPONIBLE, etablissement: etab))
+            save(new Equipement(type: types[2], numeroSerie: "${edata.slug}-SN004", description: "Imprimante ${edata.nom}", etat: EtatEquipement.DISPONIBLE, etablissement: etab))
+            save(new Equipement(type: types[3], numeroSerie: "${edata.slug}-SN005", description: "Tablette ${edata.nom}", etat: EtatEquipement.DISPONIBLE, etablissement: etab))
+            save(new Equipement(type: types[4], numeroSerie: "${edata.slug}-SN006", description: "Telephone ${edata.nom}", etat: EtatEquipement.DISPONIBLE, etablissement: etab))
 
-        save(new Signalement(equipement: eq4, personnel: alice, type: TypeSignalement.PANNE, description: "L'image est floue et la mise au point ne fonctionne plus"))
-        save(new Signalement(equipement: eq9, personnel: carole, type: TypeSignalement.PROBLEME_FONCTIONNEL, description: 'La batterie se decharge tres vite'))
+            List<Personnel> personnels = em.createQuery('select p from Personnel p where p.etablissement = :etab', Personnel)
+                    .setParameter('etab', etab).resultList
+            Personnel admin = personnels.find { it.role == RolePersonnel.ADMIN }
+            List<Personnel> users = personnels.findAll { it.role == RolePersonnel.USER }
 
-        log.info('Jeu de donnees de demonstration cree')
+            affectationService.attribuer(eq1, users[0], admin)
+            affectationService.attribuer(eq2, users[1], admin)
+
+            save(new Signalement(equipement: eq2, personnel: users[0], type: TypeSignalement.PANNE, description: "L\'equipement ne s\'allume plus"))
+            save(new Signalement(equipement: eq1, personnel: users[1], type: TypeSignalement.PROBLEME_FONCTIONNEL, description: "La porte USB ne fonctionne pas"))
+
+            log.info('Etablissement cree: {} (id={}) avec {} admins, {} users', edata.nom, etab.id, edata.admins.size(), edata.users.size())
+        }
+
+        log.info('Jeu de donnees de demonstration cree pour {} etablissements', etablissements.size())
     }
 
     private <T> T save(T entity) {
