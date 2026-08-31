@@ -20,15 +20,18 @@ class EtablissementService {
     @Inject ValidationMessagesService validationMessagesService
     @Inject RegleGestionService regleGestionService
 
+    @Transactional(readOnly = true)
     List<Etablissement> listAll() {
         em.createQuery('from Etablissement order by nom asc', Etablissement).resultList as List<Etablissement>
     }
 
+    @Transactional(readOnly = true)
     Etablissement findById(Long id) {
         if (!id) return null
         em.find(Etablissement, id)
     }
 
+    @Transactional(readOnly = true)
     Etablissement findBySlug(String slug) {
         if (!slug) return null
         List<Etablissement> r = em.createQuery('from Etablissement where lower(slug) = :s', Etablissement)

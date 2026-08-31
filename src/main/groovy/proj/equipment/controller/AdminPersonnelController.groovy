@@ -12,6 +12,7 @@ import proj.equipment.domain.RolePersonnel
 import proj.equipment.domain.Affectation
 import proj.equipment.domain.Signalement
 import proj.equipment.service.*
+import proj.equipment.service.TenantContext
 
 @CompileStatic
 @Controller('/api/admin/personnels')
@@ -24,11 +25,12 @@ class AdminPersonnelController {
     @Inject CurrentUserService currentUserService
     @Inject ValidationMessagesService validationMessagesService
     @Inject AuditService auditService
+    @Inject TenantContext tenantContext
 
     @Get
     Map<String, Object> list(@QueryValue(defaultValue = '') String q,
-                             @QueryValue(defaultValue = '10') int max,
-                             @QueryValue(defaultValue = '0') int offset) {
+                              @QueryValue(defaultValue = '10') int max,
+                              @QueryValue(defaultValue = '0') int offset) {
         catalogService.listePersonnels(q ?: null, Math.min(max, 100), Math.max(offset, 0))
     }
 
@@ -36,6 +38,7 @@ class AdminPersonnelController {
     HttpResponse<Map<String, Object>> show(@PathVariable Long id) {
         Personnel p = lookup.userById(id)
         if (!p) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Personnel introuvable')
+        if (tenantContext.currentId() && p.etablissement?.id != tenantContext.currentId()) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Personnel introuvable')
         HttpUtil.ok(proj.equipment.dto.ApiModels.personnel(p))
     }
 
@@ -46,7 +49,8 @@ class AdminPersonnelController {
                 prenom: body.prenom as String,
                 email: body.email as String,
                 motDePasse: body.motDePasse as String,
-                role: parseRole(body.role as String)
+                role: parseRole(body.role as String),
+                etablissement: tenantContext.get()
         )
         String erreur = validationMessagesService.validatePersonnel(p, true)
         if (erreur) return HttpUtil.erreur(HttpStatus.BAD_REQUEST, erreur)
@@ -59,6 +63,7 @@ class AdminPersonnelController {
     HttpResponse<Map<String, Object>> update(@PathVariable Long id, @Body Map<String, Object> body, HttpRequest<?> request) {
         Personnel p = lookup.userById(id)
         if (!p) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Personnel introuvable')
+        if (tenantContext.currentId() && p.etablissement?.id != tenantContext.currentId()) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Personnel introuvable')
         Personnel original = p
         p.nom = body.nom as String
         p.prenom = body.prenom as String
@@ -80,22 +85,23 @@ class AdminPersonnelController {
         Personnel operateur = currentUserService.get(request)
         Personnel p = lookup.userById(id)
         if (!p) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Personnel introuvable')
+        if (tenantContext.currentId() && p.etablissement?.id != tenantContext.currentId()) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Personnel introuvable')
         if (operateur && id == operateur.id) {
             return HttpUtil.erreur(HttpStatus.BAD_REQUEST, 'Impossible de supprimer votre propre compte')
         }
         if (p.role == RolePersonnel.ADMIN) {
-            long nbAdmins = em.createQuery('select count(x) from Personnel x where x.role = :r', Long)
-                    .setParameter('r', RolePersonnel.ADMIN).singleResult
+            long nbAdmins = em.createQuery('select count(x) from Personnel x where x.role = :r and x.etablissement.id = :eid', Long)
+                    .setParameter('r', RolePersonnel.ADMIN).setParameter('eid', tenantContext.currentId()).singleResult
             if (nbAdmins <= 1) {
                 return HttpUtil.erreur(HttpStatus.BAD_REQUEST, 'Impossible de supprimer le dernier administrateur')
             }
         }
-        long nbAffectations = em.createQuery('select count(a) from Affectation a where a.personnel.id = :id', Long)
-                .setParameter('id', id).singleResult
-        long nbSignalements = em.createQuery('select count(s) from Signalement s where s.personnel.id = :id', Long)
-                .setParameter('id', id).singleResult
-        long nbAttribuePar = em.createQuery('select count(a) from Affectation a where a.attribuePar.id = :id', Long)
-                .setParameter('id', id).singleResult
+        long nbAffectations = em.createQuery('select count(a) from Affectation a where a.personnel.id = :id and a.equipement.etablissement.id = :eid', Long)
+                .setParameter('id', id).setParameter('eid', tenantContext.currentId()).singleResult
+        long nbSignalements = em.createQuery('select count(s) from Signalement s where s.personnel.id = :id and s.equipement.etablissement.id = :eid', Long)
+                .setParameter('id', id).setParameter('eid', tenantContext.currentId()).singleResult
+        long nbAttribuePar = em.createQuery('select count(a) from Affectation a where a.attribuePar.id = :id and a.equipement.etablissement.id = :eid', Long)
+                .setParameter('id', id).setParameter('eid', tenantContext.currentId()).singleResult
         if (nbAffectations > 0 || nbSignalements > 0 || nbAttribuePar > 0) {
             return HttpUtil.erreur(HttpStatus.BAD_REQUEST, "Suppression impossible : historique d'affectations ou de signalements existant")
         }

@@ -10,6 +10,7 @@ import proj.equipment.domain.Affectation
 import proj.equipment.domain.Equipement
 import proj.equipment.domain.EtatEquipement
 import proj.equipment.domain.Personnel
+import proj.equipment.service.TenantContext
 
 @Singleton
 @CompileStatic
@@ -18,17 +19,15 @@ class AffectationService {
     @PersistenceContext
     EntityManager em
 
-    @Inject
-    ValidationMessagesService validationMessagesService
+    @Inject ValidationMessagesService validationMessagesService
+    @Inject TenantContext tenantContext
 
     @Transactional
     Map<String, Object> attribuer(Equipement equipement, Personnel personnel, Personnel operateur) {
-        if (!equipement) {
-            return [success: false, message: 'Equipement introuvable']
-        }
-        if (!personnel) {
-            return [success: false, message: 'Personnel introuvable']
-        }
+        if (!equipement) return [success: false, message: 'Equipement introuvable']
+        if (!personnel) return [success: false, message: 'Personnel introuvable']
+        if (etabId() && equipement.etablissement?.id != etabId()) return [success: false, message: 'Equipement hors etablissement courant']
+        if (etabId() && personnel.etablissement?.id != etabId()) return [success: false, message: 'Personnel hors etablissement courant']
         if (equipement.etat != EtatEquipement.DISPONIBLE) {
             return [success: false, message: "L'equipement ${equipement.type?.nom} (${equipement.numeroSerie}) n'est pas disponible"]
         }
@@ -42,9 +41,7 @@ class AffectationService {
                 dateAffectation: new Date()
         )
         String erreur = validationMessagesService.validateAffectation(affectation)
-        if (erreur) {
-            return [success: false, message: erreur]
-        }
+        if (erreur) return [success: false, message: erreur]
         em.persist(affectation)
         equipement.etat = EtatEquipement.AFFECTE
         em.merge(equipement)
@@ -129,16 +126,20 @@ class AffectationService {
     Affectation findActiveAffectation(Equipement equipement, Personnel personnel = null) {
         if (!equipement?.id) return null
         String q = 'from Affectation where equipement.id = :id and dateRetour is null'
+        if (etabId()) q += ' and equipement.etablissement.id = :etabId'
         if (personnel?.id) {
             q += ' and personnel.id = :pid'
         }
         jakarta.persistence.TypedQuery<Affectation> query = em.createQuery(q, Affectation).setParameter('id', equipement.id)
+        if (etabId()) query.setParameter('etabId', etabId())
         if (personnel?.id) {
             query.setParameter('pid', personnel.id)
         }
         List<Affectation> r = query.setMaxResults(1).resultList
         r ? r[0] : null
     }
+
+    private Long etabId() { tenantContext?.currentId() }
 
     Affectation findById(Long id) {
         em.find(Affectation, id)

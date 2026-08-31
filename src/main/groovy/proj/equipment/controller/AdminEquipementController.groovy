@@ -11,6 +11,7 @@ import io.micronaut.transaction.annotation.Transactional
 import proj.equipment.domain.*
 import proj.equipment.dto.ApiModels
 import proj.equipment.service.*
+import proj.equipment.service.TenantContext
 
 @CompileStatic
 @Controller('/api/admin/equipements')
@@ -24,6 +25,7 @@ class AdminEquipementController {
     @Inject ValidationMessagesService validationMessagesService
     @Inject AffectationService affectationService
     @Inject AuditService auditService
+    @Inject TenantContext tenantContext
 
     @Get
     Map<String, Object> list(@QueryValue(defaultValue = '') String q,
@@ -37,6 +39,7 @@ class AdminEquipementController {
     HttpResponse<Map<String, Object>> show(@PathVariable Long id) {
         Equipement e = lookup.equipementById(id)
         if (!e) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Equipement introuvable')
+        if (tenantContext.currentId() && e.etablissement?.id != tenantContext.currentId()) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Equipement introuvable')
         Map m = ApiModels.equipement(e)
         Affectation active = affectationService.findActiveAffectation(e)
         if (active) {
@@ -50,6 +53,7 @@ class AdminEquipementController {
     HttpResponse<Map<String, Object>> declasserConfirm(@PathVariable Long id) {
         Equipement e = lookup.equipementById(id)
         if (!e) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Equipement introuvable')
+        if (tenantContext.currentId() && e.etablissement?.id != tenantContext.currentId()) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Equipement introuvable')
         Affectation active = (e.etat == EtatEquipement.AFFECTE) ? affectationService.findActiveAffectation(e) : null
         HttpUtil.ok([
                 equipement: ApiModels.equipement(e),
@@ -67,7 +71,8 @@ class AdminEquipementController {
                 type: type,
                 numeroSerie: body.numeroSerie as String,
                 description: body.description as String,
-                etat: EtatEquipement.DISPONIBLE
+                etat: EtatEquipement.DISPONIBLE,
+                etablissement: tenantContext.get()
         )
         String erreur = validationMessagesService.validateEquipement(e, true)
         if (erreur) {
@@ -83,6 +88,7 @@ class AdminEquipementController {
         Personnel operateur = currentUser(request)
         Equipement e = lookup.equipementById(id)
         if (!e) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Equipement introuvable')
+        if (tenantContext.currentId() && e.etablissement?.id != tenantContext.currentId()) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Equipement introuvable')
 
         TypeEquipement type = resolveType(body)
         if (!type) return HttpUtil.erreur(HttpStatus.BAD_REQUEST, 'Veuillez selectionner un type')
@@ -115,6 +121,7 @@ class AdminEquipementController {
         Personnel operateur = currentUser(request)
         Equipement e = lookup.equipementById(id)
         if (!e) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Equipement introuvable')
+        if (tenantContext.currentId() && e.etablissement?.id != tenantContext.currentId()) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Equipement introuvable')
         Map<String, Object> result = affectationService.desaffecter(e)
         if (result.success) {
             auditService.log(operateur, 'DESAFFECTATION', 'Equipement', e.id, e.numeroSerie)
@@ -128,6 +135,7 @@ class AdminEquipementController {
         Personnel operateur = currentUser(request)
         Equipement e = lookup.equipementById(id)
         if (!e) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Equipement introuvable')
+        if (tenantContext.currentId() && e.etablissement?.id != tenantContext.currentId()) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Equipement introuvable')
         Map<String, Object> result = affectationService.declasser(e)
         if (result.success) {
             auditService.log(operateur, 'DECLASSEMENT', 'Equipement', e.id, e.numeroSerie)
@@ -141,21 +149,22 @@ class AdminEquipementController {
         Personnel operateur = currentUser(request)
         Equipement e = lookup.equipementById(id)
         if (!e) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Equipement introuvable')
+        if (tenantContext.currentId() && e.etablissement?.id != tenantContext.currentId()) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Equipement introuvable')
         if (e.etat == EtatEquipement.AFFECTE) {
             return HttpUtil.erreur(HttpStatus.BAD_REQUEST, 'Impossible de supprimer un equipement affecte : desaffectez-le d\'abord')
         }
 
         String info = "${e.type?.nom} - ${e.numeroSerie} (supprime)"
-        List<Affectation> affs = em.createQuery('from Affectation where equipement.id = :id', Affectation)
-                .setParameter('id', e.id).resultList as List<Affectation>
+        List<Affectation> affs = em.createQuery('from Affectation where equipement.id = :id and equipement.etablissement.id = :eid', Affectation)
+                .setParameter('id', e.id).setParameter('eid', tenantContext.currentId()).resultList as List<Affectation>
         affs.each { a ->
             if (!a.dateRetour) a.dateRetour = new Date()
             a.infoEquipement = info
             a.equipement = null
             em.merge(a)
         }
-        List<Signalement> sigs = em.createQuery('from Signalement where equipement.id = :id', Signalement)
-                .setParameter('id', e.id).resultList as List<Signalement>
+        List<Signalement> sigs = em.createQuery('from Signalement where equipement.id = :id and equipement.etablissement.id = :eid', Signalement)
+                .setParameter('id', e.id).setParameter('eid', tenantContext.currentId()).resultList as List<Signalement>
         sigs.each { s ->
             s.infoEquipement = info
             s.equipement = null

@@ -11,6 +11,7 @@ import proj.equipment.domain.Personnel
 import proj.equipment.domain.Signalement
 import proj.equipment.dto.ApiModels
 import proj.equipment.service.*
+import proj.equipment.service.TenantContext
 
 @CompileStatic
 @Controller('/api/admin/signalements')
@@ -22,11 +23,12 @@ class AdminSignalementController {
     @Inject EntityLookupService lookup
     @Inject AuditService auditService
     @Inject CurrentUserService currentUserService
+    @Inject TenantContext tenantContext
 
     @Get
     Map<String, Object> list(@QueryValue(defaultValue = '') String q,
-                             @QueryValue(defaultValue = '10') int max,
-                             @QueryValue(defaultValue = '0') int offset) {
+                              @QueryValue(defaultValue = '10') int max,
+                              @QueryValue(defaultValue = '0') int offset) {
         catalogService.listeSignalements(q ?: null, Math.min(max, 100), Math.max(offset, 0))
     }
 
@@ -35,6 +37,9 @@ class AdminSignalementController {
         Personnel operateur = currentUserService.get(request)
         Signalement s = lookup.signalementById(id)
         if (!s) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Signalement introuvable')
+        if (tenantContext.currentId() && s.equipement?.etablissement?.id != tenantContext.currentId() && s.personnel?.etablissement?.id != tenantContext.currentId()) {
+            return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Signalement introuvable')
+        }
         String info = s.personnel?.email
         em.remove(s)
         auditService.log(operateur, 'DELETE', 'Signalement', id, info)

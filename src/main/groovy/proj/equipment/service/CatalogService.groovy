@@ -2,6 +2,7 @@ package proj.equipment.service
 
 import groovy.transform.CompileStatic
 import io.micronaut.transaction.annotation.Transactional
+import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
@@ -16,16 +17,22 @@ class CatalogService {
     @PersistenceContext
     EntityManager em
 
+    @Inject TenantContext tenantContext
+
+    private Long etabId() { tenantContext.currentId() }
+
     @Transactional(readOnly = true)
     Map<String, Object> listeEquipements(String q, String etat, int max, int offset) {
         Map<String, Object> params = [:]
         StringBuilder where = new StringBuilder()
+        if (etabId()) { where.append(' e.etablissement.id = :etabId '); params.etabId = etabId() }
         if (q) {
+            if (etabId()) where.append(' and ')
             where.append(' lower(e.numeroSerie) like :p or lower(e.description) like :p or lower(t.nom) like :p ')
             params.p = '%' + q.toLowerCase() + '%'
         }
         if (etat) {
-            if (q) where.append(' and ')
+            if (etabId() || q) where.append(' and ')
             where.append(' e.etat = :etat ')
             params.etat = EtatEquipement.valueOf(etat)
         }
@@ -72,12 +79,14 @@ class CatalogService {
     Map<String, Object> listeAffectations(String q, Long typeId, int max, int offset) {
         Map<String, Object> params = [:]
         StringBuilder where = new StringBuilder()
+        if (etabId()) { where.append(' a.equipement.etablissement.id = :etabId '); params.etabId = etabId() }
         if (q) {
+            if (etabId()) where.append(' and ')
             where.append(' (lower(p.nom) like :p or lower(p.prenom) like :p or lower(ap.nom) like :p or lower(ap.prenom) like :p or lower(a.infoEquipement) like :p or lower(e.numeroSerie) like :p or lower(t.nom) like :p) ')
             params.p = '%' + q.toLowerCase() + '%'
         }
         if (typeId) {
-            if (where.length()) where.append(' and ')
+            if (etabId() || q) where.append(' and ')
             where.append(' t.id = :typeId ')
             params.typeId = typeId
         }
@@ -105,7 +114,9 @@ class CatalogService {
     Map<String, Object> listePersonnels(String q, int max, int offset) {
         Map<String, Object> params = [:]
         StringBuilder where = new StringBuilder()
+        if (etabId()) { where.append(' p.etablissement.id = :etabId '); params.etabId = etabId() }
         if (q) {
+            if (etabId()) where.append(' and ')
             where.append(' lower(p.nom) like :p or lower(p.prenom) like :p or lower(p.email) like :p ')
             params.p = '%' + q.toLowerCase() + '%'
         }
@@ -117,7 +128,8 @@ class CatalogService {
         long total = singleLong("select count(p) from Personnel p ${cond ? 'where ' + cond : ''}", params)
 
         List<Long> ids = items*.id
-        Map<Long, Long> nbAff = ids ? counts("select a.personnel.id, count(a) from Affectation a where a.personnel.id in :ids group by a.personnel.id", ids) : [:]
+        Map<Long, Long> nbAff = ids ? counts("select a.personnel.id, count(a) from Affectation a where a.personnel.id in :ids and a.equipement.etablissement.id = :etabId group by a.personnel.id", ids) : [:]
+        if (etabId()) nbAff = counts("select a.personnel.id, count(a) from Affectation a where a.personnel.id in :ids and a.equipement.etablissement.id = :etabId group by a.personnel.id", ids)
         Map<Long, Long> nbSig = ids ? counts("select s.personnel.id, count(s) from Signalement s where s.personnel.id in :ids group by s.personnel.id", ids) : [:]
 
         [
@@ -137,7 +149,9 @@ class CatalogService {
     Map<String, Object> listeSignalements(String q, int max, int offset) {
         Map<String, Object> params = [:]
         StringBuilder where = new StringBuilder()
+        if (etabId()) { where.append(' s.equipement.etablissement.id = :etabId '); params.etabId = etabId() }
         if (q) {
+            if (etabId()) where.append(' and ')
             where.append(' (lower(s.description) like :p or (s.equipement is not null and lower(e.numeroSerie) like :p)) ')
             params.p = '%' + q.toLowerCase() + '%'
         }
@@ -209,11 +223,12 @@ class CatalogService {
 
     @Transactional(readOnly = true)
     Map<String, Object> statsAdministration() {
+        Long etabId = etabId()
         [
-                totalEquipements    : singleLong('select count(e) from Equipement e', [:]),
-                affectationsEnCours : singleLong('select count(a) from Affectation a where a.dateRetour is null', [:]),
-                signalementsOuverts : singleLong('select count(s) from Signalement s', [:]),
-                totalPersonnel      : singleLong('select count(p) from Personnel p', [:])
+                totalEquipements    : etabId ? singleLong('select count(e) from Equipement e where e.etablissement.id = :etabId', [etabId: etabId]) : singleLong('select count(e) from Equipement e', [:]),
+                affectationsEnCours : etabId ? singleLong('select count(a) from Affectation a where a.dateRetour is null and a.equipement.etablissement.id = :etabId', [etabId: etabId]) : singleLong('select count(a) from Affectation a where a.dateRetour is null', [:]),
+                signalementsOuverts : etabId ? singleLong('select count(s) from Signalement s where s.equipement.etablissement.id = :etabId', [etabId: etabId]) : singleLong('select count(s) from Signalement s', [:]),
+                totalPersonnel      : etabId ? singleLong('select count(p) from Personnel p where p.etablissement.id = :etabId', [etabId: etabId]) : singleLong('select count(p) from Personnel p', [:])
         ]
     }
 
@@ -222,6 +237,7 @@ class CatalogService {
         Map<String, Object> params = [:]
         StringBuilder where = new StringBuilder(' e.etat = :etat ')
         params.etat = EtatEquipement.DISPONIBLE
+        if (etabId()) { where.append(' and e.etablissement.id = :etabId '); params.etabId = etabId() }
         if (typeId) {
             where.append(' and t.id = :tid ')
             params.tid = typeId
@@ -243,8 +259,10 @@ class CatalogService {
     List<Map<String, Object>> rechercherPersonnel(String q) {
         Map<String, Object> params = [:]
         StringBuilder where = new StringBuilder()
+        if (etabId()) { where.append(' where p.etablissement.id = :etabId '); params.etabId = etabId() }
         if (q) {
-            where.append(' where (lower(p.nom) like :p or lower(p.prenom) like :p) ')
+            if (etabId()) where.append(' and ')
+            where.append(' (lower(p.nom) like :p or lower(p.prenom) like :p) ')
             params.p = '%' + q.toLowerCase() + '%'
         }
         def items = valParams(em.createQuery("from Personnel p ${where} order by p.nom asc, p.prenom asc", Personnel), params)
@@ -289,8 +307,9 @@ class CatalogService {
 
     @Transactional(readOnly = true)
     List<Map<String, Object>> signalementsEquipement(Equipement equipement) {
+        if (etabId() && equipement?.etablissement?.id != etabId()) return []
         List<Signalement> items = em.createQuery(
-                'select s from Signalement s left join fetch s.personnel p where s.equipement.id = :eid order by s.dateCreated desc', Signalement)
+                'select s from Signalement s left join fetch s.personnel p where s.equipement.id = :eid', Signalement)
                 .setParameter('eid', equipement.id)
                 .resultList as List<Signalement>
         items.collect { s -> ApiModels.signalement(s) }
