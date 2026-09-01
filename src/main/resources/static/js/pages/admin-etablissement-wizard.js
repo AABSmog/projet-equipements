@@ -56,7 +56,7 @@ window.PAGE_INIT = function () {
     return div;
   }
   document.getElementById('add-admin').addEventListener('click', () => adminsList.appendChild(adminRow()));
-  adminsList.appendChild(adminRow({nom:'Diop', prenom:'Mamadou', motDePasse:'Admin123'}))
+  adminsList.appendChild(adminRow({nom:'Diop', prenom:'Mamadou', motDePasse:'Assane10!'}))
 
   // Employes
   const empsList = document.getElementById('employes-list');
@@ -68,7 +68,7 @@ window.PAGE_INIT = function () {
       <label class="text-xs">Prenom<input data-k="prenom" value="${esc(data.prenom||'')}" class="mt-1 w-full px-2 py-1 border border-gray-300 text-sm"/></label>
       <label class="text-xs">Email (auto)<input data-k="email" value="${esc(data.email||'')}" class="mt-1 w-full px-2 py-1 border border-gray-300 text-sm"/></label>
       <div class="flex gap-1">
-        <label class="text-xs flex-1">MDP<input data-k="motDePasse" type="password" value="${esc(data.motDePasse||'')}" class="mt-1 w-full px-2 py-1 border border-gray-300 text-sm" placeholder="User1234"/></label>
+        <label class="text-xs flex-1">MDP<input data-k="motDePasse" type="password" value="${esc(data.motDePasse||'')}" class="mt-1 w-full px-2 py-1 border border-gray-300 text-sm" placeholder="Assane10!"/></label>
         <button type="button" data-act="remove" class="mb-1 px-2 text-red-600 text-xs">x</button>
       </div>
     `;

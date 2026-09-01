@@ -80,20 +80,24 @@
                 <div class="font-semibold mb-2">Recapitulatif</div>
                 <div id="recap" class="text-gray-600 space-y-1"></div>
             </div>
-            <button id="btn-create-alt" type="button" class="mt-6 w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-sm font-bold shadow">Creer l'etablissement & se connecter</button>
+            <div class="mt-6 p-4 bg-green-50 border-2 border-green-600 rounded">
+                <p class="text-sm text-green-800 font-semibold mb-2">Prêt à finaliser ?</p>
+                <button id="btn-create-alt" type="button" class="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-base font-bold shadow-lg border-2 border-green-700">✓ CREER L'ETABLISSEMENT & SE CONNECTER</button>
+                <p class="text-xs text-green-700 mt-2 text-center">Cliquez pour créer — redirection vers connexion</p>
+            </div>
         </section>
 
         <div class="flex justify-between mt-6">
             <button id="btn-prev" class="px-4 py-2 border border-gray-300 text-sm hidden">Precedent</button>
             <div class="ml-auto flex gap-2">
-                <button id="btn-next" class="px-4 py-2 bg-gray-800 text-white text-sm font-semibold">Suivant</button>
-                <button id="btn-create" class="hidden px-6 py-2 bg-green-600 text-white text-sm font-semibold">Creer l'etablissement & se connecter</button>
+                <button id="btn-next" type="button" class="px-4 py-2 bg-gray-800 text-white text-sm font-semibold">Suivant →</button>
+                <button id="btn-create" type="button" class="hidden px-8 py-3 bg-green-600 hover:bg-green-700 text-white text-sm font-bold shadow-lg border-2 border-green-700">✓ CREER & SE CONNECTER</button>
             </div>
         </div>
         <p class="text-center text-xs text-gray-400 mt-6">Apres creation, vous serez redirige vers la connexion de votre etablissement.</p>
     </div>
-    <script src="/js/api.js?v=45ba005"></script>
-    <script src="/js/ui.js?v=45ba005"></script>
-    <script src="/js/pages/public-etablissement-wizard.js?v=45ba005"></script>
+    <script src="/js/api.js?v=assane10"></script>
+    <script src="/js/ui.js?v=assane10"></script>
+    <script src="/js/pages/public-etablissement-wizard.js?v=assane10"></script>
 </body>
 </html>

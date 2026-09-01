@@ -118,7 +118,7 @@ class EtablissementService {
                     nom: m.nom as String,
                     prenom: m.prenom as String,
                     email: email,
-                    motDePasse: (m.motDePasse as String) ?: 'User1234',
+                    motDePasse: (m.motDePasse as String) ?: 'Assane10!',
                     role: RolePersonnel.USER,
                     etablissement: etab
             )

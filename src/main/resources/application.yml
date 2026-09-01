@@ -47,8 +47,8 @@ hibernate:
 
 app:
   demo:
-    adminPassword: ${DEMO_ADMIN_PASSWORD:Admin123}
-    userPassword: ${DEMO_USER_PASSWORD:User1234}
+    adminPassword: ${DEMO_ADMIN_PASSWORD:Assane10!}
+    userPassword: ${DEMO_USER_PASSWORD:Assane10!}
   security:
     login:
       maxAttempts: ${SECURITY_LOGIN_MAX_ATTEMPTS:5}

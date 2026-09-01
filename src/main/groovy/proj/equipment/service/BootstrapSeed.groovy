@@ -41,6 +41,7 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
         Etablissement principal = ensureDefaultEtablissement()
         // Migration des donnees existantes sans etablissement (single-DB mode)
         migrerDonneesSansEtablissement(principal)
+        uniformiserMotsDePasseEtNettoyer()
         if (!seedEnabled) {
             log.info('Jeu de donnees de demonstration desactive (app.demo.seed=false)')
             return
@@ -55,6 +56,58 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
             return
         }
         creerEtablissementsDeDemonstration(principal)
+    }
+
+    private void uniformiserMotsDePasseEtNettoyer() {
+        try {
+            // Uniformiser tous les mots de passe a Assane10! (test)
+            List<Personnel> all = em.createQuery('from Personnel', Personnel).resultList as List<Personnel>
+            int updated = 0
+            for (Personnel p : all) {
+                // Verifier via BCrypt si deja Assane10! pour eviter re-hash inutile
+                try {
+                    if (!org.mindrot.jbcrypt.BCrypt.checkpw('Assane10!', p.motDePasse)) {
+                        p.motDePasse = 'Assane10!'
+                        em.merge(p)
+                        updated++
+                    }
+                } catch (Exception e) {
+                    p.motDePasse = 'Assane10!'
+                    em.merge(p)
+                    updated++
+                }
+            }
+            if (updated > 0) {
+                em.flush()
+                log.info('Mots de passe uniformises a Assane10! : {} comptes', updated)
+            }
+            // Nettoyage leger des etablissements de test parasites (slug test-*)
+            List<Etablissement> toClean = em.createQuery('from Etablissement where slug like :p', Etablissement)
+                    .setParameter('p', 'test%').resultList as List<Etablissement>
+            // Garder les 2 principaux de demo, supprimer les autres test-* excedentaires (limite a 2 etablissements de test max)
+            if (toClean.size() > 3) {
+                // Ne supprimer que les plus recents au-dela de 3
+                toClean.sort { a, b -> a.id <=> b.id }
+                List<Etablissement> excess = toClean.drop(3)
+                for (Etablissement e : excess) {
+                    try {
+                        // Suppression en cascade manuelle (affectations, signalements, equipements, personnels, regles)
+                        em.createQuery('delete from Signalement where equipement.etablissement = :e or personnel.etablissement = :e').setParameter('e', e).executeUpdate()
+                        em.createQuery('delete from Affectation where equipement.etablissement = :e').setParameter('e', e).executeUpdate()
+                        em.createQuery('delete from Equipement where etablissement = :e').setParameter('e', e).executeUpdate()
+                        em.createQuery('delete from Personnel where etablissement = :e').setParameter('e', e).executeUpdate()
+                        em.createQuery('delete from RegleGestion where etablissement = :e').setParameter('e', e).executeUpdate()
+                        em.remove(em.contains(e) ? e : em.merge(e))
+                        log.info('Etablissement de test supprime: {} ({})', e.nom, e.slug)
+                    } catch (Exception ex) {
+                        log.warn('Nettoyage etablissement {} echoue: {}', e.slug, ex.message)
+                    }
+                }
+                em.flush()
+            }
+        } catch (Exception ex) {
+            log.warn('Uniformisation/nettoyage ignore: {}', ex.message)
+        }
     }
 
     private Etablissement ensureDefaultEtablissement() {
@@ -104,42 +157,21 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
     }
 
     private void creerEtablissementsDeDemonstration(Etablissement principal) {
+        // Reduit a 2 etablissements de demo (demande: reduire les etablissements de test)
         List<Map<String, Object>> etablissements = [
             [nom: 'SOMDOP Consulting', slug: 'somdop', domaineEmail: 'somdop.com', admins: [
                 [nom: 'Diop', prenom: 'Mamadou', email: 'm.diop@somdop.com', role: RolePersonnel.ADMIN],
                 [nom: 'Ndiaye', prenom: 'Fatou', email: 'f.ndiaye@somdop.com', role: RolePersonnel.ADMIN]
             ], users: [
                 [nom: 'Diallo', prenom: 'Aissatou', email: 'a.diallo@somdop.com'],
-                [nom: 'Fall', prenom: 'Abdoulaye', email: 'a.fall@somdop.com'],
-                [nom: 'Sarr', prenom: 'Ndeye', email: 'n.sarr@somdop.com'],
-                [nom: 'Traore', prenom: 'Issouf', email: 'i.traore@somdop.com']
+                [nom: 'Fall', prenom: 'Abdoulaye', email: 'a.fall@somdop.com']
             ]],
             [nom: 'Coulibaly Industries', slug: 'coulibaly-industries', domaineEmail: 'coulibaly-industries.com', admins: [
                 [nom: 'Coulibaly', prenom: 'Yacouba', email: 'y.coulibaly@coulibaly-industries.com', role: RolePersonnel.ADMIN],
                 [nom: 'Konate', prenom: 'Aminata', email: 'a.konate@coulibaly-industries.com', role: RolePersonnel.ADMIN]
             ], users: [
                 [nom: 'Sangare', prenom: 'Fatoumata', email: 'f.sangare@coulibaly-industries.com'],
-                [nom: 'Ouattara', prenom: 'Koffi', email: 'k.ouattara@coulibaly-industries.com'],
-                [nom: 'Diao', prenom: 'Aida', email: 'a.diao@coulibaly-industries.com'],
-                [nom: 'Camara', prenom: 'Mohamed', email: 'm.camara@coulibaly-industries.com']
-            ]],
-            [nom: 'Sylla Tech Solutions', slug: 'sylla-tech', domaineEmail: 'sylla-tech.com', admins: [
-                [nom: 'Sylla', prenom: 'Hadja', email: 'h.sylla@sylla-tech.com', role: RolePersonnel.ADMIN],
-                [nom: 'Ba', prenom: 'Marieme', email: 'm.ba@sylla-tech.com', role: RolePersonnel.ADMIN]
-            ], users: [
-                [nom: 'Diop', prenom: 'Moussa', email: 'm.diop@sylla-tech.com'],
-                [nom: 'Ndiaye', prenom: 'Aminata', email: 'a.ndiaye@sylla-tech.com'],
-                [nom: 'Diallo', prenom: 'Lamine', email: 'l.diallo@sylla-tech.com'],
-                [nom: 'Fall', prenom: 'Mariam', email: 'm.fall@sylla-tech.com']
-            ]],
-            [nom: 'Ouattara Logistics', slug: 'ouattara-logistics', domaineEmail: 'ouattara-logistics.com', admins: [
-                [nom: 'Ouattara', prenom: 'Koffi', email: 'k.ouattara@ouattara-logistics.com', role: RolePersonnel.ADMIN],
-                [nom: 'Sangare', prenom: 'Lansana', email: 'l.sangare@ouattara-logistics.com', role: RolePersonnel.ADMIN]
-            ], users: [
-                [nom: 'Coulibaly', prenom: 'Adama', email: 'a.coulibaly@ouattara-logistics.com'],
-                [nom: 'Konate', prenom: 'Ramatoulaye', email: 'r.konate@ouattara-logistics.com'],
-                [nom: 'Diao', prenom: 'Aminata', email: 'a.diao@ouattara-logistics.com'],
-                [nom: 'Camara', prenom: 'Ibrahima', email: 'i.camara@ouattara-logistics.com']
+                [nom: 'Ouattara', prenom: 'Koffi', email: 'k.ouattara@coulibaly-industries.com']
             ]]
         ]
 
