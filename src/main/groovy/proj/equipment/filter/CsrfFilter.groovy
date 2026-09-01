@@ -36,8 +36,8 @@ class CsrfFilter implements HttpServerFilter {
         if (!MUTATIONS.contains(request.method)) {
             return chain.proceed(request)
         }
-        // Wizard public de creation d'etablissement accessible sans session/CSRF
-        if (request.path == '/api/etablissements/wizard') {
+        // Wizard public + auth (login/register) accessibles sans CSRF prealable
+        if (request.path == '/api/etablissements/wizard' || request.path == '/api/auth/login' || request.path == '/api/auth/register') {
             return chain.proceed(request)
         }
         Optional<Map<String, Object>> optSession = sessionManager.get(request)

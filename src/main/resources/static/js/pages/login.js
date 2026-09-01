@@ -8,6 +8,9 @@ window.PAGE_INIT = async function () {
   const loginBtn = document.getElementById('login-btn');
   if (!form) return;
 
+  // Init session CSRF avant tout POST (login)
+  try { await Api.initSession(); } catch(e) { /* ignore, sera reessaye au login */ }
+
   // Charger etablissements (public)
   let etablissements = [];
   try {
