@@ -90,3 +90,9 @@ window.PAGE_INIT = async function () {
     }
   });
 };
+// Auto-init pour page login (data-guest sans app.js) - CSP: pas de inline script
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => { if (window.PAGE_INIT && !window._loginDone) { window._loginDone = true; window.PAGE_INIT(); } });
+} else {
+  if (!window._loginDone) { window._loginDone = true; window.PAGE_INIT(); }
+}

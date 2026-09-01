@@ -94,11 +94,5 @@
     <script src="/js/api.js"></script>
     <script src="/js/ui.js"></script>
     <script src="/js/pages/public-etablissement-wizard.js"></script>
-    <script>
-      // Page publique : pas de layout, init direct sans app.js (guest)
-      document.addEventListener('DOMContentLoaded', () => {
-        if (window.PAGE_INIT && !window._wizardDone) { window._wizardDone = true; window.PAGE_INIT(); }
-      });
-    </script>
 </body>
 </html>
