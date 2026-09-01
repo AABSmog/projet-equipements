@@ -122,9 +122,9 @@ window.PAGE_INIT = function () {
       const s = parseInt(p.dataset.progress);
       p.style.width = s < n ? '100%' : '0%';
     });
-    if (btnPrev) btnPrev.classList.toggle('hidden', n === 1);
-    if (btnNext) btnNext.classList.toggle('hidden', n === total);
-    if (btnCreate) btnCreate.classList.toggle('hidden', n !== total);
+    if (btnPrev) { btnPrev.classList.toggle('hidden', n === 1); btnPrev.style.display = (n === 1) ? 'none' : ''; }
+    if (btnNext) { btnNext.classList.toggle('hidden', n === total); btnNext.style.display = (n === total) ? 'none' : ''; }
+    if (btnCreate) { btnCreate.classList.toggle('hidden', n !== total); btnCreate.style.display = (n === total) ? 'inline-block' : 'none'; }
     if (n === 4) {
       try { updateRecap(); } catch(e) { console.error('updateRecap', e); }
     }
