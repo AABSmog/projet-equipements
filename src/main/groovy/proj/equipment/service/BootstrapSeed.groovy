@@ -60,26 +60,44 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
 
     private void uniformiserMotsDePasseEtNettoyer() {
         try {
-            // Uniformiser tous les mots de passe a Assane10! (test)
+            // Mots de passe realistes par utilisateur (cf. USERS_MOTS_DE_PASSE.txt)
+            Map<String,String> real = [
+                'mamadou.diop@example.com':'Mamadou2024!', 'fatou.ndiaye@example.com':'Fatou2025#',
+                'aissatou.diallo@example.com':'Aissatou24$', 'abdoulaye.fall@example.com':'Abdoulaye2024!',
+                'ndeye.sarr@example.com':'NdeyeSarr2025!', 'ousmane.mbaye@example.com':'Ousmane2024#',
+                'marieme.ba@example.com':'MariemeBa2025$', 'coumba.bousso@example.com':'Coumba2024!',
+                'adama.danfa@example.com':'Adama2025!', 'mamadou@gmail.com':'MamadouG2024#',
+                'assane.bousso@example.com':'Assane2024!', 'admin@etabtest.com':'AdminEtab2025!',
+                'emp@etabtest.com':'EmpTest2024#', 'mohamed.diop@iam.sn':'Mohamed2024!',
+                'assane.bousso@iam.sn':'AssaneIam2025$', 'mamadou.diop@ism.edu.sn':'MamadouIsm2024!',
+                'assane.bousso@ism.edu.sn':'AssaneIsm2025#', 'admin@testfinal.com':'AdminFinal2024!',
+                'mamadou@test.com':'MamadouTest2025$', 'mamadou2@test2.com':'Mamadou2_2024!',
+                'final.test@final.com':'FinalTest2024#', 'fix.jet@jetfix.com':'FixJet2025!',
+                'test.final2@final2.com':'Final2_2024$', 'm.diop@somdop.com':'SomdopM2024!',
+                'f.ndiaye@somdop.com':'SomdopF2025#', 'a.diallo@somdop.com':'SomdopA2024$',
+                'a.fall@somdop.com':'SomdopFall2025!', 'y.coulibaly@coulibaly-industries.com':'Yacouba2024!',
+                'a.konate@coulibaly-industries.com':'Aminata2025#', 'f.sangare@coulibaly-industries.com':'Fatoumata2024$',
+                'k.ouattara@coulibaly-industries.com':'Koffi2025!'
+            ]
             List<Personnel> all = em.createQuery('from Personnel', Personnel).resultList as List<Personnel>
+            log.info('Uniformisation mdp realistes: {} comptes trouves', all.size())
             int updated = 0
             for (Personnel p : all) {
-                // Verifier via BCrypt si deja Assane10! pour eviter re-hash inutile
-                try {
-                    if (!org.mindrot.jbcrypt.BCrypt.checkpw('Assane10!', p.motDePasse)) {
-                        p.motDePasse = 'Assane10!'
-                        em.merge(p)
-                        updated++
-                    }
-                } catch (Exception e) {
-                    p.motDePasse = 'Assane10!'
-                    em.merge(p)
-                    updated++
+                String key = p.email?.toLowerCase()
+                String nv = real.get(key)
+                if (!nv) {
+                    // fallback realiste base sur prenom/nom
+                    String base = (p.prenom ?: 'User').replaceAll('[^A-Za-z]', '')
+                    nv = base.capitalize() + '2024!'
+                    if (nv.length() < 8) nv = 'Assane2024!'
                 }
+                p.motDePasse = nv
+                em.merge(p)
+                updated++
             }
             if (updated > 0) {
                 em.flush()
-                log.info('Mots de passe uniformises a Assane10! : {} comptes', updated)
+                log.info('Mots de passe realistes appliques : {} comptes', updated)
             }
             // Nettoyage leger des etablissements de test parasites (slug test-*)
             List<Etablissement> toClean = em.createQuery('from Etablissement where slug like :p', Etablissement)

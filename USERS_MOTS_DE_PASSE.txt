@@ -1,0 +1,62 @@
+# Utilisateurs - Mots de passe realistes pour tests (remplacement Assane10!)
+# Date: 2026-09-01 (mis a jour)
+# Tous les mots de passe respectent les regles par defaut : 8+ caracteres, majuscule, minuscule, chiffre, symbole optionnel
+# Fichier genere manuellement - remplace le precedent uniformise Assane10!
+# Source: BootstrapSeed.uniformiserMotsDePasseEtNettoyer() + application.yml (demo)
+
+Format: email | role | etablissement (slug) | nouveau mot de passe
+--------------------------------------------------------------------------------
+# Etablissement Principal (principal / example.com)
+mamadou.diop@example.com | ADMIN | principal | Mamadou2024!
+fatou.ndiaye@example.com | ADMIN | principal | Fatou2025#
+aissatou.diallo@example.com | USER | principal | Aissatou24$
+abdoulaye.fall@example.com | USER | principal | Abdoulaye2024!
+ndeye.sarr@example.com | USER | principal | NdeyeSarr2025!
+ousmane.mbaye@example.com | USER | principal | Ousmane2024#
+marieme.ba@example.com | USER | principal | MariemeBa2025$
+coumba.bousso@example.com | USER | principal | Coumba2024!
+adama.danfa@example.com | USER | principal | Adama2025!
+mamadou@gmail.com | USER | principal | MamadouG2024#
+assane.bousso@example.com | USER | principal | Assane2024!
+# Etab Test Iso (etab-test-iso / etabtest.com)
+admin@etabtest.com | ADMIN | etab-test-iso | AdminEtab2025!
+emp@etabtest.com | USER | etab-test-iso | EmpTest2024#
+# IAM (iam / iam.sn)
+mohamed.diop@iam.sn | ADMIN | iam | Mohamed2024!
+assane.bousso@iam.sn | USER | iam | AssaneIam2025$
+# ISM (ism / ism.edu.sn)
+mamadou.diop@ism.edu.sn | ADMIN | ism | MamadouIsm2024!
+assane.bousso@ism.edu.sn | USER | ism | AssaneIsm2025#
+# Test Final (test-final / testfinal.com)
+admin@testfinal.com | ADMIN | test-final | AdminFinal2024!
+# Test Wizard (test-wizard / test.com)
+mamadou@test.com | ADMIN | test-wizard | MamadouTest2025$
+# Test Wizard 2 (test-wizard-2 / test2.com)
+mamadou2@test2.com | ADMIN | test-wizard-2 | Mamadou2_2024!
+# Test Jet Final (test-jet-final / final.com)
+final.test@final.com | ADMIN | test-jet-final | FinalTest2024#
+# Test Admin Jet Fix (test-admin-jet-fix / jetfix.com)
+fix.jet@jetfix.com | ADMIN | test-admin-jet-fix | FixJet2025!
+# Test Admin Final Fix2 (test-admin-final-fix2 / final2.com)
+test.final2@final2.com | ADMIN | test-admin-final-fix2 | Final2_2024$
+# Demo SOMDOP Consulting (somdop / somdop.com) - pour nouvelle base vierge
+m.diop@somdop.com | ADMIN | somdop | SomdopM2024!
+f.ndiaye@somdop.com | ADMIN | somdop | SomdopF2025#
+a.diallo@somdop.com | USER | somdop | SomdopA2024$
+a.fall@somdop.com | USER | somdop | SomdopFall2025!
+# Demo Coulibaly Industries (coulibaly-industries / coulibaly-industries.com)
+y.coulibaly@coulibaly-industries.com | ADMIN | coulibaly-industries | Yacouba2024!
+a.konate@coulibaly-industries.com | ADMIN | coulibaly-industries | Aminata2025#
+f.sangare@coulibaly-industries.com | USER | coulibaly-industries | Fatoumata2024$
+k.ouattara@coulibaly-industries.com | USER | coulibaly-industries | Koffi2025!
+--------------------------------------------------------------------------------
+# Total: 31 comptes
+# SQL equivalent (BCrypt via @PrePersist) :
+#   UPDATE personnel SET mot_de_passe='<mot>' WHERE email='<email>' -- sera hashe
+# Verification login curl (exemple principal):
+#   curl -c cjar.txt http://127.0.0.1:8080/api/auth/session
+#   TOKEN=$(jq -r .csrfToken sess.json)
+#   curl -b cjar.txt -c cjar.txt -X POST -H "X-CSRF-Token: $TOKEN" -H "Content-Type: application/json" \
+#        -d '{"email":"mamadou.diop@example.com","password":"Mamadou2024!"}' http://127.0.0.1:8080/api/auth/login
+# Note: Les mots de passe ci-dessus sont ceux qui seront injectes dans la BDD au prochain demarrage
+#       via BootstrapSeed (ou via le script update-realistic-passwords.groovy)
