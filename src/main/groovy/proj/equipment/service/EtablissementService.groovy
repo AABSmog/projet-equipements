@@ -53,9 +53,9 @@ class EtablissementService {
         String nom = etabMap?.nom?.toString()?.trim()
         String domaine = etabMap?.domaineEmail?.toString()?.trim() ?: 'example.com'
         String slug = etabMap?.slug?.toString()?.trim() ?: slugify(nom)
-        if (!nom) return [success: false, message: "Le nom de l'etablissement est obligatoire"]
-        if (!slug) return [success: false, message: "Le slug est obligatoire"]
-        if (findBySlug(slug)) return [success: false, message: "Un etablissement avec ce slug existe deja"]
+        if (!nom) return [success: false, message: "Le nom de l'entreprise est obligatoire"]
+        if (!slug) return [success: false, message: "Le code est obligatoire"]
+        if (findBySlug(slug)) return [success: false, message: "Une entreprise avec ce code existe déjà"]
         // Création etablissement (single-DB mode : dbUrl null)
         Etablissement etab = new Etablissement(
                 nom: nom,
@@ -133,7 +133,7 @@ class EtablissementService {
         em.flush()
         [
             success     : true,
-            message     : ("Etablissement '${etab.nom}' cree : ${createdAdmins.size()} admin(s), ${createdEmps.size()} employe(s)").toString(),
+            message     : ("Entreprise '${etab.nom}' créée : ${createdAdmins.size()} administrateur(s), ${createdEmps.size()} employé(s)").toString(),
             etablissement: [id: etab.id, nom: etab.nom, slug: etab.slug, domaineEmail: etab.domaineEmail],
             admins      : createdAdmins.collect { [id: it.id, email: it.email, nom: it.nom, prenom: it.prenom] },
             employes    : createdEmps.collect { [id: it.id, email: it.email] }

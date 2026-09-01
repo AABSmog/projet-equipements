@@ -42,23 +42,23 @@ class CsrfFilter implements HttpServerFilter {
         }
         Optional<Map<String, Object>> optSession = sessionManager.get(request)
         if (!optSession.present) {
-            return Mono.just(HttpResponse.status(HttpStatus.BAD_REQUEST, 'Requete rejetee : jeton de securite invalide.')
-                    .body([error: 'Requete rejetee : jeton de securite invalide.']))
+            return Mono.just(HttpResponse.status(HttpStatus.BAD_REQUEST, 'Session expiree, veuillez rafraichir la page.')
+                    .body([error: 'Session expiree, veuillez rafraichir la page.']))
         }
         Map<String, Object> session = optSession.get()
         String token = session.get(SessionManager.ATTR_TOKEN) as String
         if (!token) {
-            return Mono.just(HttpResponse.status(HttpStatus.BAD_REQUEST, 'Requete rejetee : jeton de securite invalide.')
-                    .body([error: 'Requete rejetee : jeton de securite invalide.']))
+            return Mono.just(HttpResponse.status(HttpStatus.BAD_REQUEST, 'Session expiree, veuillez rafraichir la page.')
+                    .body([error: 'Session expiree, veuillez rafraichir la page.']))
         }
         String header = request.headers.get('X-CSRF-Token')
         if (!header) {
-            return Mono.just(HttpResponse.status(HttpStatus.BAD_REQUEST, 'Requete rejetee : jeton de securite invalide.')
-                    .body([error: 'Requete rejetee : jeton de securite invalide.']))
+            return Mono.just(HttpResponse.status(HttpStatus.BAD_REQUEST, 'Session expiree, veuillez rafraichir la page.')
+                    .body([error: 'Session expiree, veuillez rafraichir la page.']))
         }
         if (header != token) {
-            return Mono.just(HttpResponse.status(HttpStatus.BAD_REQUEST, 'Requete rejetee : jeton de securite invalide.')
-                    .body([error: 'Requete rejetee : jeton de securite invalide.']))
+            return Mono.just(HttpResponse.status(HttpStatus.BAD_REQUEST, 'Session expiree, veuillez rafraichir la page.')
+                    .body([error: 'Session expiree, veuillez rafraichir la page.']))
         }
         chain.proceed(request)
     }

@@ -12,7 +12,7 @@ function renderNavigation(user, active) {
     nav += `
       <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Administration</div>
       ${li('/admin/index.html', 'Dashboard', '/admin/ind')}
-      ${li('/admin/etablissement-wizard.html', 'Etablissements', '/admin/etab')}
+      ${li('/admin/etablissement-wizard.html', 'Entreprises', '/admin/etab')}
       <div class="mt-4 px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Gestion</div>
       ${li('/admin/equipements.html', 'Equipements', '/admin/equip')}
       ${li('/admin/affectations.html', 'Affectations', '/admin/affect')}

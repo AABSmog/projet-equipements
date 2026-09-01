@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Nouvel etablissement - Gestion Equipements</title>
+    <title>Nouvelle entreprise - Gestion Equipements</title>
     <link rel="stylesheet" href="/css/tailwind.css"/>
 </head>
 <body data-admin="1" data-active="/admin/etab" class="bg-gray-50 font-sans antialiased">
@@ -12,8 +12,8 @@
         <main class="flex-1 overflow-y-auto">
             <div class="px-6 pt-5"><div id="flash-container"></div></div>
             <div class="p-6 max-w-4xl mx-auto">
-                <h1 class="text-xl font-bold text-gray-900 mb-1">Creer un etablissement</h1>
-                <p class="text-sm text-gray-500 mb-6">Chaque etablissement dispose de sa propre base et de ses regles. Suivez les 4 etapes.</p>
+                <h1 class="text-xl font-bold text-gray-900 mb-1">Créer une entreprise</h1>
+                <p class="text-sm text-gray-500 mb-6">Chaque entreprise dispose de son propre espace et de ses règles. Suivez les 4 étapes.</p>
 
                 <!-- Stepper -->
                 <div class="flex items-center gap-2 mb-8">
@@ -42,12 +42,12 @@
 
                 <!-- Etape 1 -->
                 <section data-panel="1" class="bg-white border border-gray-200 p-6">
-                    <h2 class="font-semibold mb-4">1. Informations de l'etablissement</h2>
+                    <h2 class="font-semibold mb-4">1. Informations de l'entreprise</h2>
                     <div class="grid grid-cols-2 gap-4">
-                        <label class="text-sm">Nom *<input id="etab-nom" class="mt-1 w-full px-3 py-2 border border-gray-300 text-sm" placeholder="Ex: Lycee Technique"/></label>
-                        <label class="text-sm">Slug (auto)<input id="etab-slug" class="mt-1 w-full px-3 py-2 border border-gray-300 text-sm bg-gray-50" placeholder="lycee-technique"/></label>
-                        <label class="text-sm">Domaine email<input id="etab-domaine" class="mt-1 w-full px-3 py-2 border border-gray-300 text-sm" placeholder="lycee.sn"/></label>
-                        <div class="text-xs text-gray-500 flex items-end pb-2">Utilise pour l'auto-generation : <span id="email-preview" class="font-mono ml-1">prenom.nom@lycee.sn</span></div>
+                        <label class="text-sm">Nom de l'entreprise *<input id="etab-nom" class="mt-1 w-full px-3 py-2 border border-gray-300 text-sm" placeholder="Ex: Atelier Dakar"/></label>
+                        <label class="text-sm">Code (auto)<input id="etab-slug" class="mt-1 w-full px-3 py-2 border border-gray-300 text-sm bg-gray-50" placeholder="atelier-dakar"/></label>
+                        <label class="text-sm">Domaine<input id="etab-domaine" class="mt-1 w-full px-3 py-2 border border-gray-300 text-sm" placeholder="atelier.sn"/></label>
+                        <div class="text-xs text-gray-500 flex items-end pb-2">Aperçu email : <span id="email-preview" class="font-mono ml-1">prenom.nom@atelier.sn</span></div>
                     </div>
                 </section>
 
@@ -78,25 +78,25 @@
                     </div>
                     <div class="mt-6 p-4 bg-green-50 border-2 border-green-600 rounded">
                         <p class="text-sm text-green-800 font-semibold mb-2">Prêt à finaliser ?</p>
-                        <button id="btn-create-alt" type="button" class="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-base font-bold shadow-lg border-2 border-green-700">✓ CREER L'ETABLISSEMENT</button>
-                        <p class="text-xs text-green-700 mt-2 text-center">Cliquez pour créer — vous serez redirigé ensuite</p>
+                        <button id="btn-create-alt" type="button" class="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-base font-bold shadow-lg border-2 border-green-700">✓ CRÉER L'ENTREPRISE</button>
+                        <p class="text-xs text-green-700 mt-2 text-center">Votre entreprise sera prête immédiatement</p>
                     </div>
                 </section>
 
                 <div class="flex justify-between mt-6">
-                    <button id="btn-prev" type="button" class="px-4 py-2 border border-gray-300 text-sm hidden">Precedent</button>
+                    <button id="btn-prev" type="button" class="px-4 py-2 border border-gray-300 text-sm hidden">Précédent</button>
                     <div class="ml-auto flex gap-2">
                         <button id="btn-next" type="button" class="px-4 py-2 bg-gray-800 text-white text-sm font-semibold">Suivant →</button>
-                        <button id="btn-create" type="button" class="hidden px-8 py-3 bg-green-600 hover:bg-green-700 text-white text-sm font-bold shadow-lg border-2 border-green-700">✓ CREER L'ETABLISSEMENT</button>
+                        <button id="btn-create" type="button" class="hidden px-8 py-3 bg-green-600 hover:bg-green-700 text-white text-sm font-bold shadow-lg border-2 border-green-700">✓ CRÉER L'ENTREPRISE</button>
                     </div>
                 </div>
             </div>
         </main>
     </div>
-    <script src="/js/api.js?v=jetonfix3"></script>
-    <script src="/js/layout.js?v=jetonfix3"></script>
-    <script src="/js/ui.js?v=jetonfix3"></script>
-    <script src="/js/pages/admin-etablissement-wizard.js?v=jetonfix3"></script>
-    <script src="/js/app.js?v=jetonfix3"></script>
+    <script src="/js/api.js?v=entreprise"></script>
+    <script src="/js/layout.js?v=entreprise"></script>
+    <script src="/js/ui.js?v=entreprise"></script>
+    <script src="/js/pages/admin-etablissement-wizard.js?v=entreprise"></script>
+    <script src="/js/app.js?v=entreprise"></script>
 </body>
 </html>

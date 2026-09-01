@@ -25,14 +25,14 @@ class AdminEtablissementController {
     @Get('/{id}')
     HttpResponse<Map<String, Object>> show(@PathVariable Long id) {
         Etablissement e = etablissementService.findById(id)
-        if (!e) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Etablissement introuvable')
+        if (!e) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Entreprise introuvable')
         HttpUtil.ok([id: e.id, nom: e.nom, slug: e.slug, domaineEmail: e.domaineEmail, statut: e.statut, dbUrl: e.dbUrl] as Map<String, Object>)
     }
 
     @Get('/slug/{slug}')
     HttpResponse<Map<String, Object>> bySlug(@PathVariable String slug) {
         Etablissement e = etablissementService.findBySlug(slug)
-        if (!e) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Etablissement introuvable')
+        if (!e) return HttpUtil.erreur(HttpStatus.NOT_FOUND, 'Entreprise introuvable')
         HttpUtil.ok([id: e.id, nom: e.nom, slug: e.slug, domaineEmail: e.domaineEmail] as Map<String, Object>)
     }
 

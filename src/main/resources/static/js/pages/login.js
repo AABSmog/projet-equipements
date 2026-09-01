@@ -1,4 +1,4 @@
-/* Page de connexion - avec selection d'etablissement */
+/* Page de connexion - avec selection d'entreprise */
 window.PAGE_INIT = async function () {
   const form = document.getElementById('login-form');
   const errorBox = document.getElementById('login-error');
@@ -8,10 +8,10 @@ window.PAGE_INIT = async function () {
   const loginBtn = document.getElementById('login-btn');
   if (!form) return;
 
-  // Init session CSRF avant tout POST (login)
+  // Init session avant tout POST (login)
   try { await Api.initSession(); } catch(e) { /* ignore, sera reessaye au login */ }
 
-  // Charger etablissements (public)
+  // Charger entreprises
   let etablissements = [];
   try {
     etablissements = await fetch('/api/etablissements', { headers: { 'Accept': 'application/json' } }).then(r => r.json());
@@ -27,11 +27,11 @@ window.PAGE_INIT = async function () {
 
   // Remplir select
   if (!etablissements.length) {
-    etabSelect.innerHTML = '<option value="">Aucun etablissement</option>';
+    etabSelect.innerHTML = '<option value="">Aucune entreprise</option>';
     if (noEtabMsg) noEtabMsg.classList.remove('hidden');
-    if (etabInfo) { etabInfo.textContent = 'Creez votre premier etablissement pour commencer.'; etabInfo.classList.remove('hidden'); }
+    if (etabInfo) { etabInfo.textContent = 'Créez votre première entreprise pour commencer.'; etabInfo.classList.remove('hidden'); }
   } else {
-    etabSelect.innerHTML = etablissements.map(e => `<option value="${e.id}" data-slug="${esc(e.slug)}">${esc(e.nom)} (${esc(e.slug)})</option>`).join('');
+    etabSelect.innerHTML = etablissements.map(e => `<option value="${e.id}" data-slug="${esc(e.slug)}">${esc(e.nom)}</option>`).join('');
     const slug = slugFromUrl();
     if (slug) {
       const found = etablissements.find(e => e.slug === slug);
@@ -48,7 +48,7 @@ window.PAGE_INIT = async function () {
       const updateInfo = () => {
         const sel = etablissements.find(e => String(e.id) === etabSelect.value);
         if (sel) {
-          etabInfo.textContent = 'Base : equipments_' + sel.slug.replace(/-/g,'_') + ' · Domaine : ' + (sel.domaineEmail || '—');
+          etabInfo.textContent = sel.nom + (sel.domaineEmail ? ' · ' + sel.domaineEmail : '');
           etabInfo.classList.remove('hidden');
         }
       };
@@ -69,7 +69,7 @@ window.PAGE_INIT = async function () {
     hideError(errorBox);
     const etablissementId = etabSelect.value;
     if (!etablissementId) {
-      showError(errorBox, 'Veuillez selectionner un etablissement');
+      showError(errorBox, 'Veuillez sélectionner une entreprise');
       return;
     }
     const email = document.getElementById('email').value.trim();

@@ -1,4 +1,4 @@
-/* Wizard creation etablissement - 4 etapes */
+/* Wizard création entreprise - 4 étapes */
 window.PAGE_INIT = function () {
   let step = 1;
   const total = 4;
@@ -143,10 +143,10 @@ window.PAGE_INIT = function () {
     })).filter(e => e.nom || e.prenom);
     const regles = [...reglesPanel.querySelectorAll('[data-regle]')].map(i => `${i.dataset.regle}=${i.type==='checkbox'?i.checked:i.value}`).join(', ');
     document.getElementById('recap').innerHTML = `
-      <div><b>Etablissement :</b> ${esc(etabNom.value)} (${esc(etabSlug.value)}) — domaine ${esc(etabDomaine.value||'exemple.com')}</div>
+      <div><b>Entreprise :</b> ${esc(etabNom.value)} (${esc(etabSlug.value)})</div>
       <div><b>Admins :</b> ${admins.map(a=>esc(a.prenom+' '+a.nom+' <'+a.email+'>')).join(', ')}</div>
-      <div><b>Employes :</b> ${emps.length ? emps.map(e=>esc(e.prenom+' '+e.nom)).join(', ') : 'aucun'}</div>
-      <div><b>Regles :</b> ${esc(regles)}</div>
+      <div><b>Employés :</b> ${emps.length ? emps.map(e=>esc(e.prenom+' '+e.nom)).join(', ') : 'aucun'}</div>
+      <div><b>Règles :</b> ${esc(regles)}</div>
     `;
   }
 
@@ -154,8 +154,8 @@ window.PAGE_INIT = function () {
   btnNext.addEventListener('click', () => {
     hideError(errorBox);
     if (step === 1) {
-      if (!etabNom.value.trim()) return showError(errorBox, 'Le nom de l\'etablissement est obligatoire');
-      if (!etabSlug.value.trim()) return showError(errorBox, 'Le slug est obligatoire');
+      if (!etabNom.value.trim()) return showError(errorBox, 'Le nom de l\'entreprise est obligatoire');
+      if (!etabSlug.value.trim()) return showError(errorBox, 'Le code est obligatoire');
     }
     if (step === 2) {
       const admins = [...adminsList.children];
@@ -198,7 +198,7 @@ window.PAGE_INIT = function () {
         etablissement: { nom: etabNom.value.trim(), slug: etabSlug.value.trim(), domaineEmail: etabDomaine.value.trim() },
         admins, employes, regles
       });
-      Flash.set('Etablissement cree — connectez-vous', 'success');
+      Flash.set('Entreprise créée — connectez-vous', 'success');
       const slug = res.etablissement ? res.etablissement.slug : etabSlug.value.trim();
       window.location = '/index.html?etablissement=' + encodeURIComponent(slug);
     } catch (err) {

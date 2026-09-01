@@ -1,4 +1,4 @@
-/* Regles de gestion par etablissement */
+/* Règles de gestion par entreprise */
 window.PAGE_INIT = function () {
   const sel = document.getElementById('etab-select');
   const fields = document.getElementById('regles-fields');

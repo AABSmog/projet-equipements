@@ -42,6 +42,7 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
         // Migration des donnees existantes sans etablissement (single-DB mode)
         migrerDonneesSansEtablissement(principal)
         uniformiserMotsDePasseEtNettoyer()
+        assurerEquipementsPourTous()
         if (!seedEnabled) {
             log.info('Jeu de donnees de demonstration desactive (app.demo.seed=false)')
             return
@@ -56,6 +57,70 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
             return
         }
         creerEtablissementsDeDemonstration(principal)
+    }
+
+    private void assurerEquipementsPourTous() {
+        try {
+            // S'assurer que chaque Entreprise (Etablissement) a au moins 5-6 equipements
+            List<TypeEquipement> types = em.createQuery('from TypeEquipement', TypeEquipement).resultList as List<TypeEquipement>
+            if (!types) {
+                types = [
+                    save(new TypeEquipement(nom: 'Ordinateur')),
+                    save(new TypeEquipement(nom: 'Projecteur')),
+                    save(new TypeEquipement(nom: 'Imprimante')),
+                    save(new TypeEquipement(nom: 'Tablette')),
+                    save(new TypeEquipement(nom: 'Telephone'))
+                ]
+                em.flush()
+            }
+            List<Etablissement> allEtab = em.createQuery('from Etablissement', Etablissement).resultList as List<Etablissement>
+            int totalGen = 0
+            for (Etablissement etab : allEtab) {
+                long nbEq = em.createQuery('select count(e) from Equipement e where e.etablissement = :etab', Long)
+                        .setParameter('etab', etab).singleResult
+                if (nbEq >= 5) continue
+                // Generer equipements manquants
+                long base = nbEq
+                List<String> descs = [
+                    "Ordinateur portable Dell Latitude", "Station fixe HP EliteDesk",
+                    "Projecteur Epson", "Imprimante Brother", "Tablette Samsung Galaxy Tab", "Telephone iPhone"
+                ]
+                for (int i = (int)base; i < 6; i++) {
+                    TypeEquipement t = types[i % types.size()]
+                    String sn = "${etab.slug.toUpperCase()}-EQ-${String.format('%03d', i+1)}-${System.currentTimeMillis() % 10000}"
+                    // eviter doublon sn
+                    sn = sn.replaceAll('[^A-Z0-9\\-]', '')
+                    Equipement eq = new Equipement(
+                        type: t,
+                        numeroSerie: sn + "-${etab.id}-${i}",
+                        description: descs[i % descs.size()] + " - ${etab.nom}",
+                        etat: EtatEquipement.DISPONIBLE,
+                        etablissement: etab
+                    )
+                    save(eq)
+                    totalGen++
+                }
+                // Assurer quelques affectations si personnel disponible
+                try {
+                    List<Personnel> pers = em.createQuery('select p from Personnel p where p.etablissement = :etab', Personnel)
+                            .setParameter('etab', etab).setMaxResults(3).resultList as List<Personnel>
+                    List<Equipement> eqs = em.createQuery('select e from Equipement e where e.etablissement = :etab and e.etat = :etat', Equipement)
+                            .setParameter('etab', etab).setParameter('etat', EtatEquipement.DISPONIBLE).setMaxResults(2).resultList as List<Equipement>
+                    if (pers.size() >= 2 && eqs.size() >= 1) {
+                        Personnel admin = pers.find { it.role == RolePersonnel.ADMIN } ?: pers[0]
+                        for (int k = 0; k < Math.min(eqs.size(), 2); k++) {
+                            try { affectationService.attribuer(eqs[k], pers[k % pers.size()], admin) } catch (e) { /* ignore si deja affecte */ }
+                        }
+                    }
+                } catch (Exception e) { log.debug('Affectation auto ignore pour {}: {}', etab.slug, e.message) }
+            }
+            if (totalGen > 0) {
+                em.flush()
+                log.info('Equipements generes pour toutes les entreprises : {} nouveaux', totalGen)
+            }
+        } catch (Exception ex) {
+            log.warn('Assurer equipements ignore: {}', ex.message)
+        }
     }
 
     private void uniformiserMotsDePasseEtNettoyer() {
