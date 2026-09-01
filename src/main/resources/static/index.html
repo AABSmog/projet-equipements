@@ -59,6 +59,10 @@
         <p class="text-center text-xs text-gray-500 mt-4">Projet Equipements &copy; 2026 — Base = Etablissement</p>
     </div>
     <script src="/js/api.js"></script>
+    <script src="/js/ui.js"></script>
     <script src="/js/pages/login.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => { if (window.PAGE_INIT && !window._loginDone) { window._loginDone = true; window.PAGE_INIT(); } });
+    </script>
 </body>
 </html>

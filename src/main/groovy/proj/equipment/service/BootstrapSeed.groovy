@@ -153,6 +153,10 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
 
         etablissements.each { Map edata ->
             Etablissement etab = save(new Etablissement(nom: edata.nom, slug: edata.slug, domaineEmail: edata.domaineEmail, statut: 'ACTIF'))
+            em.flush()
+            RegleGestion.defaults(etab.domaineEmail).each { k, v ->
+                em.persist(new RegleGestion(etablissement: etab, cle: k, valeur: v))
+            }
             edata.admins.each { Map a ->
                 save(new Personnel(nom: a.nom, prenom: a.prenom, email: a.email, motDePasse: demoAdminPassword, role: a.role, etablissement: etab))
             }
@@ -166,6 +170,7 @@ class BootstrapSeed implements ApplicationEventListener<ApplicationStartupEvent>
             save(new Equipement(type: types[2], numeroSerie: "${edata.slug}-SN004", description: "Imprimante ${edata.nom}", etat: EtatEquipement.DISPONIBLE, etablissement: etab))
             save(new Equipement(type: types[3], numeroSerie: "${edata.slug}-SN005", description: "Tablette ${edata.nom}", etat: EtatEquipement.DISPONIBLE, etablissement: etab))
             save(new Equipement(type: types[4], numeroSerie: "${edata.slug}-SN006", description: "Telephone ${edata.nom}", etat: EtatEquipement.DISPONIBLE, etablissement: etab))
+            em.flush()
 
             List<Personnel> personnels = em.createQuery('select p from Personnel p where p.etablissement = :etab', Personnel)
                     .setParameter('etab', etab).resultList
