@@ -64,8 +64,9 @@ class AuthController {
             attrs.put('etablissementId', user.etablissement?.id)
             attrs.put('etablissementSlug', user.etablissement?.slug)
             // Rotation du jeton CSRF au login pour prévenir la fixation
-            attrs.put(SessionManager.ATTR_TOKEN, UUID.randomUUID().toString())
-            response.body([user: userMap] as Map<String, Object>)
+            String newToken = UUID.randomUUID().toString()
+            attrs.put(SessionManager.ATTR_TOKEN, newToken)
+            response.body([user: userMap, csrfToken: newToken] as Map<String, Object>)
             return response
         } else {
             loginAttemptService.registerFailure(emailKey)

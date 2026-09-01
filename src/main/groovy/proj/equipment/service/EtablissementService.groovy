@@ -133,7 +133,7 @@ class EtablissementService {
         em.flush()
         [
             success     : true,
-            message     : "Etablissement '${etab.nom}' cree : ${createdAdmins.size()} admin(s), ${createdEmps.size()} employe(s)",
+            message     : ("Etablissement '${etab.nom}' cree : ${createdAdmins.size()} admin(s), ${createdEmps.size()} employe(s)").toString(),
             etablissement: [id: etab.id, nom: etab.nom, slug: etab.slug, domaineEmail: etab.domaineEmail],
             admins      : createdAdmins.collect { [id: it.id, email: it.email, nom: it.nom, prenom: it.prenom] },
             employes    : createdEmps.collect { [id: it.id, email: it.email] }

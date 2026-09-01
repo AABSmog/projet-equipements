@@ -73,6 +73,9 @@ const Api = (() => {
       if (data && Object.prototype.hasOwnProperty.call(data, 'user')) {
         currentUser = data.user;
       }
+      if (data && Object.prototype.hasOwnProperty.call(data, 'csrfToken')) {
+        csrfToken = data.csrfToken;
+      }
       return data;
     } catch (err) {
       clearTimeout(timeoutId);

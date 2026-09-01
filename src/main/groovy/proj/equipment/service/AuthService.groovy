@@ -23,8 +23,8 @@ class AuthService {
     @Transactional(readOnly = true)
     Personnel authenticate(String email, String password, Long etablissementId) {
         if (!email || !password) return null
-        String jpql = 'from Personnel where lower(email) = :e'
-        if (etablissementId) jpql += ' and etablissement.id = :eid'
+        String jpql = 'from Personnel p left join fetch p.etablissement where lower(p.email) = :e'
+        if (etablissementId) jpql += ' and p.etablissement.id = :eid'
         def query = em.createQuery(jpql, Personnel).setParameter('e', email.trim().toLowerCase())
         if (etablissementId) query.setParameter('eid', etablissementId)
         List<Personnel> users = query.setMaxResults(1).resultList
