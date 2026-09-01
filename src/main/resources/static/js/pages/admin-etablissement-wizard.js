@@ -122,10 +122,17 @@ window.PAGE_INIT = function () {
       const s = parseInt(p.dataset.progress);
       p.style.width = s < n ? '100%' : '0%';
     });
-    btnPrev.classList.toggle('hidden', n === 1);
-    btnNext.classList.toggle('hidden', n === total);
-    btnCreate.classList.toggle('hidden', n !== total);
-    if (n === 4) updateRecap();
+    // navigation boutons - explicite pour eviter bug toggle + garantir visibilite etape 4
+    if (btnPrev) btnPrev.classList.toggle('hidden', n === 1);
+    if (btnNext) btnNext.classList.toggle('hidden', n === total);
+    if (btnCreate) {
+      btnCreate.classList.toggle('hidden', n !== total);
+      // fallback style si Tailwind hidden ecrase
+      btnCreate.style.display = (n === total) ? '' : '';
+    }
+    if (n === 4) {
+      try { updateRecap(); } catch(e) { console.error('updateRecap', e); }
+    }
     hideError(errorBox);
   }
 
@@ -168,10 +175,14 @@ window.PAGE_INIT = function () {
     showStep(step + 1);
   });
 
-  btnCreate.addEventListener('click', async () => {
+  async function doCreate(btn) {
     hideError(errorBox);
-    btnCreate.disabled = true;
-    btnCreate.textContent = 'Creation...';
+    const target = btn || btnCreate;
+    target.disabled = true;
+    const origText = target.textContent;
+    target.textContent = 'Creation...';
+    const altBtn = document.getElementById('btn-create-alt');
+    if (altBtn) { altBtn.disabled = true; altBtn.textContent = 'Creation...'; }
     const admins = [...adminsList.children].map(div => ({
       nom: div.querySelector('[data-k=nom]').value.trim(),
       prenom: div.querySelector('[data-k=prenom]').value.trim(),
@@ -186,7 +197,6 @@ window.PAGE_INIT = function () {
     })).filter(e => e.nom || e.prenom);
     const regles = {};
     reglesPanel.querySelectorAll('[data-regle]').forEach(i => regles[i.dataset.regle] = i.type==='checkbox' ? String(i.checked) : i.value);
-
     try {
       const res = await Api.post('/api/admin/etablissements/wizard', {
         etablissement: { nom: etabNom.value.trim(), slug: etabSlug.value.trim(), domaineEmail: etabDomaine.value.trim() },
@@ -197,10 +207,14 @@ window.PAGE_INIT = function () {
     } catch (err) {
       showError(errorBox, err.message);
     } finally {
-      btnCreate.disabled = false;
-      btnCreate.textContent = 'Creer l\'etablissement';
+      target.disabled = false;
+      target.textContent = origText;
+      if (altBtn) { altBtn.disabled = false; altBtn.textContent = 'Creer l\'etablissement'; }
     }
-  });
+  }
+  btnCreate.addEventListener('click', () => doCreate(btnCreate));
+  const btnAlt = document.getElementById('btn-create-alt');
+  if (btnAlt) btnAlt.addEventListener('click', () => doCreate(btnAlt));
 
   showStep(1);
 };
