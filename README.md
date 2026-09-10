@@ -1,187 +1,131 @@
-# Gestion d'Équipements — Version Micronaut
+# Gestion d'Équipements — Version Micronaut (Entreprise)
 
-Port **Micronaut 5** de l'application Grails de gestion du parc informatique : suivi des équipements, affectations au personnel et signalements. **API REST JSON** (`/api/**`) + front statique (`/static`).
-
----
-
-## Table des matières
-- [Fonctionnalités](#fonctionnalités)
-- [Versions](#versions)
-- [Prérequis](#prérequis)
-- [Démarrage rapide (15 minutes)](#démarrage-rapide-15-minutes)
-- [Comptes de démonstration](#comptes-de-démonstration)
-- [Diagramme des classes de domaine](#diagramme-des-classes-de-domaine)
-- [Règles métier](#règles-métier)
-- [Jeu de données de démonstration](#jeu-de-données-de-démonstration)
-- [Tests](#tests)
-- [Structure du projet](#structure-du-projet)
-- [Documentation complémentaire](#documentation-complémentaire)
-
----
-
-## Fonctionnalités
-- **Administrateur** : `GET/POST /api/admin/equipements|personnels|affectations|signalements|audit` + écrans `static/admin/*` ; historique `/api/admin/affectations/historique` (qui a attribué quoi, à qui, quand).
-- **Utilisateur** : `GET /api/app/equipements` + `POST /api/app/signalements` + restitution `POST /api/admin/affectations/{id}/retour` (ou `/api/app/...` selon rôle).
-- **Inscription publique** `POST /api/auth/register` ; login `POST /api/auth/login` + session `GET /api/auth/session` (jeton CSRF).
-- **Sécurité** : BCrypt, politique mdp 8car + complexité, CSRF `X-CSRF-Token`, brute-force 5/15min + quota register 3/fenêtre, en-têtes CSP/X-Frame/nosniff, cookie `HttpOnly SameSite=Lax 30m`.
-- **Audit** : `AuditLog` + `GET /api/admin/audit` + `admin/audit.html`.
-- **Pagination** : `max/offset` (max 100) + conservation `q`/`typeId`/`etat`.
+Port **Micronaut 5** de l'application Grails : suivi du parc par **Entreprise** (ex-Établissement), équipements, affectations, signalements. **API REST JSON** (`/api/**`) + front statique.
 
 ## Versions
 | Composant | Version |
 |-----------|---------|
-| Application | 1.0.0 |
-| Micronaut | 5.0.2 (Netty, Data JPA, Validation) |
+| App | 1.0.0 |
+| Micronaut | 5.0.2 |
 | Groovy | 4.0.32 |
-| JDK | 26 (compatible 17+) |
+| JDK | 26 (17+) |
 | PostgreSQL | 17 |
-| Spock | 2.x (`micronaut-test-spock`) |
-| bcrypt | 0.4 (org.mindrot) |
+| Spock | 2.x |
+| bcrypt | 0.4 |
 
 ## Prérequis
-1. **JDK 26** (ou 17+) — Adoptium/Oracle.
-2. **PostgreSQL 17** démarré.
-3. **Git**.
+JDK 26, PostgreSQL 17, Git.
 
-## Démarrage rapide (15 minutes)
+## Démarrage rapide — 15 minutes
 
-### 1. Cloner
+**1. Cloner**
 ```bash
-git clone <url-micronaut>.git
+git clone <url>.git
 cd Proj-Equipment-Micronaut
 ```
 
-### 2. Créer la base
+**2. Base**
 ```sql
 CREATE DATABASE "Equipments";
 ```
-Schéma créé au premier démarrage (`hibernate.hbm2ddl.auto: validate` en prod, `update` si `EQUIPMENTS_DB_DDL=update`).
 
-### 3. Variables d'environnement
-| Variable | Rôle | Défaut |
-|----------|------|--------|
-| `EQUIPMENTS_DB_URL` | URL JDBC | `jdbc:postgresql://127.0.0.1:5432/Equipments` |
-| `EQUIPMENTS_DB_USER` | user PG | `postgres` |
-| `EQUIPMENTS_DB_PASSWORD` | **mot de passe PG (obligatoire)** | — |
-| `PORT` | port HTTP | `8080` |
-| `DEMO_ADMIN_PASSWORD` | mdp admin démo | `Admin123` |
-| `DEMO_USER_PASSWORD` | mdp user démo | `User1234` |
-| `EQUIPMENTS_DB_DDL` | `validate`/`update` | `validate` |
-| `SECURITY_LOGIN_MAX_ATTEMPTS` etc. | seuils brute-force | 5 / 900s / 300s |
+**3. Variables**
+| Variable | Défaut | Note |
+|----------|--------|------|
+| `EQUIPMENTS_DB_PASSWORD` | — | **obligatoire** PG |
+| `EQUIPMENTS_DB_URL` | `jdbc:postgresql://127.0.0.1:5432/Equipments` | |
+| `DEMO_ADMIN_PASSWORD` / `DEMO_USER_PASSWORD` | `Assane10!` | seed si base vide |
+| `PORT` | `8080` | |
+| `EQUIPMENTS_DB_DDL` | `validate` (prod) / `update` (dev) | |
 
-Exemples :
 ```bash
-# Linux/macOS
-export EQUIPMENTS_DB_PASSWORD=votre_mot_de_passe
 # PowerShell
-$env:EQUIPMENTS_DB_PASSWORD="votre_mot_de_passe"
+$env:EQUIPMENTS_DB_PASSWORD="Smogolem10!"
+$env:DEMO_ADMIN_PASSWORD="Assane10!"
 # CMD
-set EQUIPMENTS_DB_PASSWORD=votre_mot_de_passe
+set EQUIPMENTS_DB_PASSWORD=Smogolem10!
 ```
 
-> `Admin123` / `User1234` ne servent qu'au seed de démo (si base vide). Une base existante conserve ses hash BCrypt.
-
-### 4. Lancer
+**4. Lancer**
 ```bash
-# Dev avec seed (base vide → jeu de démo inséré)
-EQUIPMENTS_DB_DDL=update EQUIPMENTS_DB_PASSWORD=votre_mot_de_passe ./gradlew run
-
-# Ou via java
-./gradlew build
-EQUIPMENTS_DB_PASSWORD=votre_mot_de_passe java -jar build/libs/Proj-Equipment-Micronaut-1.0.0-all.jar
+EQUIPMENTS_DB_DDL=update EQUIPMENTS_DB_PASSWORD=Smogolem10! ./gradlew run
+# → http://localhost:8080
+# Login : choisis une Entreprise, ex: admin@testfinal.com / AdminFinal2024! (voir USERS_MOTS_DE_PASSE.txt)
 ```
-Ouvrez `http://localhost:8080` → `index.html` (login) → `/admin/index.html` ou `/app/equipements.html`.
 
-Le premier démarrage crée le schéma (si `update`) puis insère le jeu de démo (voir ci-dessous).
-
-### 5. (Optionnel) Build natif / Docker
+**5. Vérifier**
 ```bash
-./gradlew dockerBuild   # nécessite Docker
+curl http://localhost:8080/api/etablissements # liste entreprises
+curl http://localhost:8080/api/meta
+EQUIPMENTS_DB_PASSWORD=Smogolem10! ./gradlew test # 45 tests
 ```
 
 ## Comptes de démonstration
-| Rôle | Email | Mot de passe |
-|------|-------|--------------|
-| Administrateur | `mamadou.diop@example.com` | `Admin123` |
-| Utilisateur | `aissatou.diallo@example.com` | `User1234` |
-> Surchargeables via `DEMO_ADMIN_PASSWORD` / `DEMO_USER_PASSWORD`.
+Tous les mots de passe uniformisés au boot (`BootstrapSeed.groovy:61` → `USERS_MOTS_DE_PASSE.txt`).
 
-## Diagramme des classes de domaine
+| Entreprise | Email | Mot de passe | Rôle |
+|------------|-------|--------------|------|
+| principal | `mamadou.diop@example.com` | `Mamadou2024!` | ADMIN |
+| principal | `fatou.ndiaye@example.com` | `Fatou2025#` | ADMIN |
+| principal | `aissatou.diallo@example.com` | `Aissatou24$` | USER |
+| test-final | `admin@testfinal.com` | `AdminFinal2024!` | ADMIN |
+| etab-test-iso | `admin@etabtest.com` | `AdminEtab2025!` | ADMIN |
+| somdop (nouvelle base) | `m.diop@somdop.com` | `SomdopM2024!` | ADMIN |
+
+> Liste complète `USERS_MOTS_DE_PASSE.txt` (31 comptes). Sur nouvelle base, `somdop`/`coulibaly-industries` créés avec 6 équipements chacun.
+
+## Diagramme des classes
 ```mermaid
 classDiagram
+    class Entreprise { +String nom +String slug +String domaineEmail }
     class TypeEquipement { +String nom }
     class Equipement { +String numeroSerie +String description +EtatEquipement etat }
-    class Affectation { +Date dateAffectation +Date dateRetour +String raisonRetour +String infoEquipement }
-    class Signalement { +Date dateCreated +TypeSignalement type +String description +String infoEquipement }
+    class Affectation { +Date dateAffectation +Date dateRetour +Personnel attribuePar +String infoEquipement }
     class Personnel { +String nom +String prenom +String email +String motDePasse +RolePersonnel role }
-    class EtatEquipement { <<enumeration>> DISPONIBLE AFFECTE EN_PANNE REPARE HORS_SERVICE }
-    class TypeSignalement { <<enumeration>> PANNE PROBLEME_FONCTIONNEL CASSE AUTRE }
-    class RolePersonnel { <<enumeration>> ADMIN USER }
+    class Signalement { +Date dateCreated +TypeSignalement type +String description }
+    class RegleGestion { +String cle +String valeur }
+    class AuditLog { +String utilisateur +String action }
+    Entreprise "1" --> "*" Personnel : emploie
+    Entreprise "1" --> "*" Equipement : possède
+    Entreprise "1" --> "*" RegleGestion : configure
     TypeEquipement "1" --> "*" Equipement
-    Equipement "0..1" --> "0..*" Affectation
+    Equipement "0..1" --> "*" Affectation
     Personnel "1" --> "*" Affectation : reçoit
     Personnel "0..1" --> "*" Affectation : attribue
-    Personnel "1" --> "*" Signalement : signale
-    Equipement "0..1" --> "*" Signalement : concerne
-    Equipement --> EtatEquipement
-    Signalement --> TypeSignalement
-    Personnel --> RolePersonnel
+    Personnel "1" --> "*" Signalement
+    Equipement "0..1" --> "*" Signalement
 ```
-Source PlantUML : `plantuml/class-diagram.wsd` (PNG dans même dossier).
 
 ## Règles métier
-**Équipement** : créé DISPONIBLE, SN auto `SN-XXXXXXXX` si absent, SN unique, description+type obligatoires ; AFFECTE exige affectation active, DISPONIBLE/HORS_SERVICE interdits si affectation active.
+- **Equipement** : créé `DISPONIBLE`, SN auto `SN-…` unique insensible casse, `AFFECTE` exige affectation active, `HORS_SERVICE` clôture + `infoEquipement`.
+- **Affectation** : `DISPONIBLE` → `AFFECTE` + `attribuePar` (historique), déjà affecté / `EN_PANNE` refusé, `desaffecter` → `DISPONIBLE`, `declasser` → `HORS_SERVICE`, `dateRetour>=dateAffectation`, double restitution refusée.
+- **Personnel** : email unique/validé, mdp 8+ complexité BCrypt, dernier ADMIN protégé, suppression bloquée si historique.
+- **Signalement** : type+description obligatoires, seul équipement affecté.
+- **Entreprise** : `etablissement_id` isole tout (`TenantFilter` → `TenantContext`), `RegleGestion` par entreprise (`/admin/regles.html`), wizard 4 étapes `POST /api/etablissements/wizard` et `/api/admin/etablissements/wizard`.
 
-**Affectation** : attribuer exige DISPONIBLE → crée `Affectation(attribuePar, dateAffectation)` + eq→AFFECTE ; déjà affecté → refus ; restitution pose `dateRetour`+`raisonRetour` → eq→DISPONIBLE ; double restitution → refus ; `dateRetour>=dateAffectation` ; déclassement clôture affectation active + `infoEquipement="...declasse"` + eq→HORS_SERVICE.
-
-**Personnel** : email unique/validé, mdp 8car + minuscule/majuscule/chiffre (surchargeable par établissement), BCrypt via `@PrePersist/@PreUpdate`, `role` ADMIN/USER ; suppression bloquée si historique, auto-suppression interdite.
-
-**Signalement** : description+type obligatoires ; seul équipement affecté à l'utilisateur courant.
-
-**Types** : nom unique insensible casse, création via équipement uniquement.
-
-**Multi-établissements** (v3) : chaque `Etablissement` (`id, nom, slug, domaineEmail, dbUrl`) isole ses `Personnel`/`Equipement` via `etablissement_id` (single-DB) et prépare le routage vers `equipments_<slug>` (multi-DB physique via `TenantDataSourceFactory`). Les `RegleGestion` (`email.pattern`, `password.*`, `affectation.dureeMaxJours`) sont par établissement et éditables dans `/admin/regles.html` (preview live `{prenom}.{nom}@domaine`). Le wizard `/admin/etablissement-wizard.html` guide en 4 étapes (Infos → Admins → Employés → Règles & récap) avec validation inline et `POST /api/admin/etablissements/wizard` transactionnel.
-
-## Jeu de données de démonstration
-Créé par `BootstrapSeed.groovy` **si** `app.demo.seed=true` **et** `type_equipement` vide :
-- 5 types (Ordinateur, Projecteur, Imprimante, Tablette, Téléphone) ;
-- 9 équipements (DISPONIBLE/AFFECTE/EN_PANNE/REPARE) ;
-- 7 personnels (2 ADMIN, 5 USER) ;
-- 2 affectations (`attribuePar` renseigné) + 2 signalements.
-Mots de passe via `app.demo.adminPassword` / `userPassword` (env).
+## Jeu de données
+`BootstrapSeed.groovy:37` si `app.demo.seed=true` et base vide → 2 entreprises démo + `assurerEquipementsPourTous()` (6/entreprise si <5) + uniformisation mdp réalistes. Sinon `assurerEquipementsPourTous` garantit quand même des équipements.
 
 ## Tests
-Spock 45 tests (8 suites) : contraintes (`ValidationMessagesService`), services `AffectationService` (attribution, restitution, desaffecter, déclasser + cas d'erreur), `LoginAttemptService`, `AuditService`, intégration parcours complet.
 ```bash
-# Tous les tests (nécessite PG + mot de passe)
-EQUIPMENTS_DB_PASSWORD=votre_mot_de_passe ./gradlew test
-
-# Un test
-EQUIPMENTS_DB_PASSWORD=votre_mot_de_passe ./gradlew test --tests "*AffectationServiceSpec*"
-```
-Résultat attendu : **45 tests, 0 échec**.
-
-## Structure du projet
-```
-Proj-Equipment-Micronaut/
-├── src/main/groovy/proj/equipment/
-│   ├── controller/  # Admin* (REST /api/admin), App* (/api/app), AuthController, HttpUtil
-│   ├── domain/      # Equipement, Personnel, Affectation (+attribuePar), Signalement, TypeEquipement, AuditLog, enums
-│   ├── dto/         # ApiModels
-│   ├── filter/      # AuthFilter, CsrfFilter, SecurityHeadersFilter
-│   └── service/     # AffectationService, ValidationMessagesService, BootstrapSeed, CatalogService, AuditService, ...
-├── src/main/resources/
-│   ├── application.yml
-│   └── static/      # admin/*, app/*, js/api.js (groupCollapsed, sanitize ***), js/ui.js (submitGuard)
-├── src/test/groovy/proj/equipment/ # 8 Spock specs (45 tests)
-├── cahiers-de-recette/ # recette-v1.md (Grails), recette-v2.md (Micronaut, 42 scénarios OK)
-├── plantuml/class-diagram.wsd
-└── build.gradle
+EQUIPMENTS_DB_PASSWORD=Smogolem10! ./gradlew test
+# 45 tests Spock (8 suites : PersonnelSpec, EquipementSpec, AffectationSpec, TypeEquipementSpec, AffectationServiceSpec 12, AuditServiceSpec, LoginAttemptServiceSpec, ParcoursCompletIntegrationSpec)
 ```
 
-## Documentation complémentaire
-- `LIMITES_CONNUES.md` — limites restantes.
-- `cahiers-de-recette/recette-v2.md` — PV de recette Micronaut (42 scénarios).
+## Structure
+```
+controller/ # Admin*, App*, Auth, PublicEtablissement
+domain/ # Entreprise(Etablissement), Equipement, Affectation(attribuePar), Personnel, Signalement, RegleGestion
+service/ # AffectationService, BootstrapSeed, CatalogService, TenantContext
+static/ # admin/*, app/*, js/pages/*, index.html (entreprise)
+cahiers-de-recette/ # recette-v3 (20 scénarios), v2 (42)
+```
 
----
-**Dépôt propre** : aucun secret committé (`password: ${EQUIPMENTS_DB_PASSWORD}`), commits en français, seed via `BootstrapSeed` uniquement si base vide.
+## Historique des attributions
+`Affectation.attribuePar` (`Affectation.groovy:25`) + `dateAffectation/dateRetour` → `GET /api/admin/affectations/historique` (`AdminAffectationController.groovy:34`, `CatalogService.groovy:79` `order by dateAffectation desc`, `join fetch attribuePar`) → `admin/affectation-historique.html` colonnes *Équipement, N° Série, Attribué à/par, Dates, Raison, Statut*.
+
+## Documentation
+- `API_GUIDE.md` — tous les endpoints
+- `LIMITES_CONNUES.md`
+- `USERS_MOTS_DE_PASSE.txt`
+- `cahiers-de-recette/recette-micronaut-v3.md`
